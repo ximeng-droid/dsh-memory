@@ -871,19 +871,26 @@ function paintWriteMode(v) {
 
 function paintPort(cfg) {
   const fixed = Number(cfg?.panel?.fixedPort || 0);
-  const seg = el('#portSeg');
-  if (seg) {
-    seg.querySelectorAll('button').forEach((b) => {
-      b.setAttribute('aria-pressed', Number(b.dataset.v) === fixed ? 'true' : 'false');
-    });
-  }
+  const inp = el('#portInput');
+  if (inp && document.activeElement !== inp) inp.value = fixed > 0 ? String(fixed) : '';
   const now = el('#portNow');
   if (now) {
-    // 固定端口优先（那是重启后的稳定地址）；否则显示当前来源
-    const base = fixed > 0
+    const st = state.portStatus || {};
+    let base = fixed > 0
       ? `http://127.0.0.1:${fixed}/dsh-memory/` + (location.port === String(fixed) ? '' : '（重启后生效）')
       : (/^https?:/.test(location.protocol) ? `${location.origin}/dsh-memory/` : '跟随 DSH 端口（每启动一次会变）');
+    if (fixed > 0 && st.error) base += `（${st.error}，换个端口试试）`;
     now.textContent = base;
+  }
+}
+
+/* 问服务端这个端口能不能绑：返回 {ok, error} */
+async function checkPort(port) {
+  try {
+    const r = await api(`port?p=${encodeURIComponent(port)}`);
+    return { ok: Boolean(r.ok), error: r.error || '' };
+  } catch (e) {
+    return { ok: false, error: e?.message || '检测失败' };
   }
 }
 
@@ -895,7 +902,20 @@ function setPortNote(text, bad) {
 }
 
 async function savePort(v) {
-  const fixedPort = Number(v) || 0;
+  const raw = String(v ?? '').trim();
+  const fixedPort = raw === '' ? 0 : Number(raw);
+  if (raw !== '' && (!Number.isInteger(fixedPort) || fixedPort < 1024 || fixedPort > 65535)) {
+    setPortNote('端口要填 1024–65535 之间的整数', true);
+    return;
+  }
+  if (fixedPort > 0) {
+    setPortNote(`正在检查 ${fixedPort}…`);
+    const chk = await checkPort(fixedPort);
+    if (!chk.ok) {
+      setPortNote(`${fixedPort} ${chk.error || '不可用'}，换一个再试`, true);
+      return;
+    }
+  }
   try {
     await api('config', { method: 'POST', body: JSON.stringify({ panel: { fixedPort } }) });
     if (state.config) state.config.panel = { ...(state.config.panel || {}), fixedPort };
@@ -913,6 +933,7 @@ async function loadConfig() {
     const data = await api('config');
     const config = data.config || {};
     state.config = config;
+    state.portStatus = data.portStatus || {};
     state.root = data.root || config.root || '';
     state.defaultRoot = data.defaultRoot || '';
     paintPort(config);
@@ -1297,11 +1318,17 @@ function bind() {
       await load();
     });
   }
-  // 「地址」= 跟随 DSH 端口 / 固定 8787（改完要重启 DSH 才起新监听）
-  const portSeg = el('#portSeg');
-  if (portSeg) {
-    els('button', portSeg).forEach((b) => b.addEventListener('click', () => savePort(b.dataset.v)));
-  }
+  // 「地址」= 跟随 DSH 端口 / 固定到任意端口（改完要重启 DSH 才起新监听）
+  el('#portSave')?.addEventListener('click', () => savePort(el('#portInput')?.value ?? ''));
+  el('#portFollow')?.addEventListener('click', () => { const i = el('#portInput'); if (i) i.value = ''; savePort(''); });
+  el('#portInput')?.addEventListener('input', async () => {
+    const v = String(el('#portInput')?.value ?? '').trim();
+    if (!v) { setPortNote('跟随 DSH 端口：每启动一次地址会变'); return; }
+    const n = Number(v);
+    if (!Number.isInteger(n) || n < 1024 || n > 65535) { setPortNote('端口要填 1024–65535 之间的整数', true); return; }
+    const chk = await checkPort(n);
+    setPortNote(chk.ok ? `${n} 可用，点「固定到这儿」保存（重启后生效）` : `${n} ${chk.error}`, !chk.ok);
+  });
   // 「记多少」= 写入口径，落进 config.json（manual 不自动抓 / semi 只进待确认箱 / auto 直接生效）
   const wm = el('#writeModeSeg');
   if (wm) {

@@ -155,9 +155,12 @@
       <h3>面板</h3>
       <div class="fld col">
         <div class="lab"><b>地址</b><span>固定后书签就不怕重启（改完要重启一次 DSH 才生效）</span></div>
-        <div class="seg" id="portSeg" data-seg>
-          <button data-v="0" aria-pressed="false">跟随 DSH</button>
-          <button data-v="8787" aria-pressed="false">固定 8787</button>
+        <div class="pathrow">
+          <input id="portInput" type="number" min="1024" max="65535" step="1" inputmode="numeric" spellcheck="false" placeholder="例如 8787">
+        </div>
+        <div class="pathbtns">
+          <button class="btn primary" id="portSave">固定到这儿</button>
+          <button class="btn" id="portFollow">跟随 DSH</button>
         </div>
         <div class="hint" id="portNote">当前地址：<span class="mono" id="portNow">—</span></div>
       </div>
