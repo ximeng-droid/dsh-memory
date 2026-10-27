@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>我的记忆</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<!-- build: b185656 -->
+<body data-world="a" data-panel="1">
+<!-- D 的液态背景（其他世界由 CSS 忽略） -->
+<div class="blobs" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i><span class="grain"></span></div>
+
+<div class="shell">
+
+  <!-- ================= 顶栏：设置入口就在这儿，看得见 ================= -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark"><i data-ico="mark"></i></span>
+      <b>我的记忆</b>
+      <span class="dot" id="diagDot" hidden></span>
+    </div>
+    <div class="crumb">
+      <span>收件</span><span class="sep">/</span><strong>待确认箱</strong>
+    </div>
+
+    <div class="search">
+      <i data-ico="search"></i>
+      <input type="search" placeholder="搜索记忆、编号或标签" aria-label="搜索记忆">
+      <span class="kbd">Ctrl K</span>
+    </div>
+    <span class="grow"></span>
+
+    <button class="btn primary"><i data-ico="plus"></i>新增记忆</button>
+
+    <button class="btn ghost icon" title="快捷键与用法" aria-label="快捷键与用法"><i data-ico="help"></i></button>
+  </header>
+
+  <!-- ================= 左栏 ================= -->
+  <nav class="rail" aria-label="视图">
+    <!-- 导航条目由 app.js 的 renderRail 动态生成（.tmp 容器）；这里不放静态骨架，否则会重复一份 -->
+    <div class="foot">
+      <div class="div"></div>
+      <div class="status"><span class="dot"></span><span>本地服务运行中 · 9077</span></div>
+      <button id="openSettings" data-open-settings aria-expanded="false" aria-controls="settings" aria-haspopup="dialog"><i data-ico="gear"></i><span>设置</span><span class="n">Ctrl ,</span></button>
+    </div>
+  </nav>
+
+  <!-- ================= 中栏 ================= -->
+  <section class="listpane" aria-label="待确认箱">
+    <div class="listhead">
+      <div class="t">
+        <h2>待确认箱</h2>
+        <span class="meta">3 条 · 最早 10-24 21:03 · 7 天后自动降级为日记</span>
+      </div>
+      <div class="acts">
+        <button class="btn"><i data-ico="check"></i>全收</button>
+        <button class="btn"><i data-ico="x"></i>全丢</button>
+      </div>
+    </div>
+
+    <div class="filters" role="group" aria-label="按类型筛选">
+      <button class="chip" data-chip aria-pressed="true">全部 <span class="c">3</span></button>
+      <button class="chip" data-chip aria-pressed="false">偏好 <span class="c">1</span></button>
+      <button class="chip" data-chip aria-pressed="false">事实 <span class="c">1</span></button>
+      <button class="chip" data-chip aria-pressed="false">决策 <span class="c">1</span></button>
+    </div>
+
+    <!-- 卡片列表（A / B / D） -->
+    <div class="rows cards" id="rows"></div>
+
+    <div class="listfoot">
+      <span><kbd>J</kbd><kbd>K</kbd> 移动</span>
+      <span><kbd>Enter</kbd> 收下</span>
+      <span><kbd>Del</kbd> 丢弃</span>
+      <span class="right">已选 1 条 · 共 4 条</span>
+    </div>
+  </section>
+
+  <!-- ================= 右栏详情 ================= -->
+  <aside class="detail" aria-label="记忆详情">
+    <div class="body" id="detail"></div>
+
+    <div class="actionbar">
+      <button class="btn yes"><i data-ico="check"></i>收下</button>
+      <button class="btn"><i data-ico="pencil"></i>编辑正文</button>
+      <button class="btn danger"><i data-ico="x"></i>丢弃</button>
+      <span class="note">确认后旧版存进 _trash/历史，可一键恢复</span>
+    </div>
+  </aside>
+</div>
+
+<!-- ================= 设置抽屉 ================= -->
+<div class="scrim-bg" id="scrim"></div>
+<aside class="drawer" id="settings" aria-hidden="true" aria-label="设置">
+  <header>
+    <i data-ico="gear"></i>
+    <h2>设置</h2>
+    <button class="btn ghost icon x" data-close aria-label="关闭设置"><i data-ico="x"></i></button>
+  </header>
+
+  <div class="scroll">
+    <div class="grp">
+      <button class="disc" id="personaDisc" aria-expanded="false" aria-controls="personaBody">
+        <i data-ico="mark"></i><b>关于你</b>
+        <span class="hint" id="personaSum">还没填</span>
+        <span class="pill warn" id="sugBadge" hidden>0 条建议</span>
+        <i data-ico="chev" class="chev"></i>
+      </button>
+      <div id="personaBody" hidden>
+      <div class="fld col">
+        <div class="lab"><b>称呼 / 语言</b></div>
+        <div class="two">
+          <input id="psCall" placeholder="怎么称呼你，如 老王">
+          <input id="psLang" placeholder="语言，如 中文">
+        </div>
+      </div>
+      <div class="fld col">
+        <div class="lab"><b>说话风格</b></div>
+        <input id="psStyle" placeholder="直接，别绕">
+      </div>
+      <div class="fld col">
+        <div class="lab"><b>边界 / 原则</b><span>一行一条，最多 8 条</span></div>
+        <textarea id="psBounds" rows="3" placeholder="不确定的事直说，别猜&#10;不要替我改系统设置"></textarea>
+      </div>
+      <div class="pathbtns">
+        <button class="btn primary" id="psSave">保存</button>
+        <span class="hint" id="psNote"></span>
+      </div>
+      <div class="sugbox" id="sugBox">
+        <div class="sughead">
+          <b>建议</b>
+          <span class="hint" id="sugNote"></span>
+          <button class="btn small" id="sugRefresh">重新找一遍</button>
+        </div>
+        <div class="sugrows" id="sugRows"></div>
+      </div>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h3>写入</h3>
+      <div class="fld">
+        <div class="lab"><b>记多少</b><span id="writeModeNote">半自动：给你候选，你确认后才入库</span></div>
+        <div class="seg" id="writeModeSeg" data-seg>
+          <button data-v="manual" aria-pressed="false">手动</button>
+          <button data-v="semi" aria-pressed="true">半自动</button>
+          <button data-v="auto" aria-pressed="false">自动</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h3>面板</h3>
+      <div class="fld col">
+        <div class="lab"><b>地址</b><span>固定后书签就不怕重启（改完要重启一次 DSH 才生效）</span></div>
+        <div class="seg" id="portSeg" data-seg>
+          <button data-v="0" aria-pressed="false">跟随 DSH</button>
+          <button data-v="8787" aria-pressed="false">固定 8787</button>
+        </div>
+        <div class="hint" id="portNote">当前地址：<span class="mono" id="portNow">—</span></div>
+      </div>
+      <div class="fld">
+        <div class="lab"><b>启用账号密码登录</b><span>关闭后只靠本机 + 来源校验，面板会常驻红字提醒</span></div>
+        <button class="switch" data-switch aria-checked="true" role="switch" aria-label="启用账号密码登录"></button>
+      </div>
+      <div class="fld">
+        <div class="lab"><b>账号</b><span>默认 owner，可改成你习惯的名字；改名后旧登录态失效</span></div>
+        <div style="display:flex;gap:8px;align-items:center"><span class="mono" style="font-size:12.5px;color:var(--fg-2)">owner</span><button class="btn">改名</button></div>
+      </div>
+      <div class="fld">
+        <div class="lab"><b>密码</b><span>只存 scrypt 哈希；上次修改 10-25 18:20</span></div>
+        <button class="btn">改密码</button>
+      </div>
+      <div class="fld">
+        <div class="lab"><b>登录有效 12 小时</b><span>过期需重新登录；连续 5 次错密码锁 60 秒</span></div>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h3>外观</h3>
+
+      <div class="fld">
+        <div class="lab"><b>明暗</b><span>浅色版与深色版可以随时换，不影响数据</span></div>
+        <div class="seg" data-axis="mode">
+          <button data-v="light" aria-pressed="true">浅色</button>
+          <button data-v="dark" aria-pressed="false">深色</button>
+        </div>
+      </div>
+
+      <div class="fld">
+        <div class="lab"><b>版式</b><span>纸感＝实心面板；玻璃＝磨砂透明（下方可调透明度）</span></div>
+        <div class="seg" data-axis="style">
+          <button data-v="solid" aria-pressed="true">纸感</button>
+          <button data-v="glass" aria-pressed="false">玻璃</button>
+        </div>
+      </div>
+
+      <div class="fld">
+        <div class="lab"><b>主题色</b><span>选中即生效；「＋」用取色器挑任意颜色</span></div>
+        <div class="swatches">
+          <button class="sw" data-color="#5B4BC4" style="background:#5B4BC4" aria-pressed="false" aria-label="靛紫"></button>
+          <button class="sw" data-color="#0F766E" style="background:#0F766E" aria-pressed="false" aria-label="松绿"></button>
+          <button class="sw" data-color="#B4442E" style="background:#B4442E" aria-pressed="false" aria-label="赭红"></button>
+          <button class="sw" data-color="#1D4ED8" style="background:#1D4ED8" aria-pressed="false" aria-label="靛蓝"></button>
+          <button class="sw" data-color="#8A5A00" style="background:#8A5A00" aria-pressed="false" aria-label="赭金"></button>
+          <button class="sw" data-color="#37414F" style="background:#37414F" aria-pressed="false" aria-label="石墨"></button>
+          <label class="sw plus" title="自定义颜色">＋
+            <input id="customColor" type="color" value="#5B4BC4" style="position:absolute;inset:0;opacity:0;cursor:pointer">
+          </label>
+          <button class="btn ghost" id="accentReset" style="height:24px;padding:0 8px;font-size:12px">恢复默认</button>
+        </div>
+      </div>
+
+      <div class="fld" id="glassField">
+        <div class="lab"><b>面板透明度</b><span>纸感、玻璃都生效；越低越透，越高越好读</span></div>
+        <div class="rangewrap">
+          <input class="range" id="glassRange" type="range" min="20" max="70" step="1" value="42" aria-label="面板透明度">
+          <span class="range-val" id="glassVal">42%</span>
+        </div>
+      </div>
+
+      <div class="fld">
+        <div class="lab"><b>背景图</b><span>可以用你电脑里的图片；调低上面的透明度就能透出来</span></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="thumb" id="bgThumb"><i data-ico="image"></i></span>
+          <label class="btn" style="cursor:pointer" id="bgPick"><span id="bgPickText">选择图片</span>
+            <input id="bgFile" type="file" accept="image/*" style="position:absolute;width:1px;height:1px;opacity:0">
+          </label>
+          <button class="btn ghost" id="bgRemove" disabled>移除</button>
+        </div>
+      </div>
+
+      <div class="fld">
+        <div class="lab"><b>字号</b><span>影响列表与正文</span></div>
+        <div class="seg" data-axis="fs">
+          <button data-v="s" aria-pressed="false">小</button>
+          <button data-v="m" aria-pressed="true">中</button>
+          <button data-v="l" aria-pressed="false">大</button>
+        </div>
+      </div>
+
+      <div class="fld">
+        <div class="lab"><b>登录页</b><span>换主题、改密码都在这里预览效果</span></div>
+        <a class="btn" href="login.html" target="_blank" rel="noopener">打开登录页</a>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h3>检索</h3>
+      <div class="fld">
+        <div class="lab"><b>向量检索</b><span id="vecNote">正在看…</span></div>
+        <div class="seg" id="vecSeg" data-seg>
+          <button data-v="1" aria-pressed="true">开</button>
+          <button data-v="0" aria-pressed="false">关</button>
+        </div>
+      </div>
+      <div class="fld">
+        <div class="lab"><b>补齐向量</b><span>改过内容的条目会重算；点一次只补缺的那些</span></div>
+        <button class="btn" id="btnVector">建一次</button>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h3>数据</h3>
+      <div class="fld" style="flex-direction:column; align-items:stretch; gap:0">
+        <div class="lab"><b>记忆库位置</b><span>纯 Markdown 文件，可直接用编辑器打开、也能提交 git</span></div>
+        <div class="pathrow">
+          <i data-ico="folder"></i>
+          <input id="rootPath" type="text" spellcheck="false" autocomplete="off" placeholder="填一个文件夹路径">
+          <span class="n" id="rootCount">0 条</span>
+        </div>
+        <div class="pathbtns">
+          <button class="btn primary" id="rootSave">改到这儿</button>
+          <button class="btn" id="rootDefault">用默认位置</button>
+        </div>
+        <div class="hint" id="rootNote">换位置时旧库会复制过来，原文件夹不动</div>
+      </div>
+      <div class="fld">
+        <div class="lab"><b>重建索引</b><span>索引可随时重算，不参与事实判断</span></div>
+        <button class="btn" id="btnReindex">重建</button>
+      </div>
+      <div class="fld">
+        <div class="lab"><b>维护</b><span>90 天没检索过的标成「过期」、30 天前的日记压成一条摘录（原文进 _archive）</span></div>
+        <button class="btn" id="btnMaintain">清理一次</button>
+      </div>
+      <div class="fld">
+        <div class="lab"><b>撤销自动写入</b><span>「自动」模式直接入库的记忆，撤回最近一条（进垃圾桶，可捞回）</span></div>
+        <button class="btn" id="btnUndo">撤销上一条</button>
+      </div>
+      <div class="hint" id="maintNote" style="color:var(--fg-3)"></div>
+      <div class="fld" style="flex-direction:column; align-items:stretch; gap:6px">
+        <div class="lab"><b>运行状态</b><span>最后一次抓取 / 维护 / 重建索引的时间</span></div>
+        <div class="diagrows" id="diagRows"></div>
+      </div>
+      <div class="fld" style="flex-direction:column; align-items:stretch; gap:6px">
+        <div class="lab"><b>项目</b><span>按文件夹归拢记忆；只属于某个项目的条目在别处不注入</span></div>
+        <div class="projrows" id="projRows"></div>
+        <div class="pathbtns">
+          <button class="btn" id="btnNormalize">把老路径规整成项目</button>
+        </div>
+        <div class="hint" id="projNote" style="color:var(--fg-3)"></div>
+      </div>
+      <div class="fld" style="flex-direction:column; align-items:stretch; gap:6px">
+        <div class="lab"><b>专题</b><span>把同主题的几条记忆煮成一页，方便通读</span></div>
+        <div class="pathrow">
+          <i data-ico="graph"></i>
+          <input id="pageTopic" placeholder="例如 pnpm、端口、记忆库" autocomplete="off" />
+        </div>
+        <div class="pathbtns"><button class="btn" id="btnComposePage">煮一页</button></div>
+        <div class="hint" id="pageNote" style="color:var(--fg-3)"></div>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h3>危险操作</h3>
+      <div class="fld">
+        <div class="lab"><b>重置登录口令</b><span>新口令会打印在会话里</span></div>
+        <button class="btn">重置</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span class="hint">改动即时生效，不写回 DSH 配置</span>
+    <button class="btn" data-close>关闭</button>
+  </footer>
+</aside>
+
+<script src="icons.js"></script>
+<script src="theme.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

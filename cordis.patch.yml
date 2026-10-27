@@ -1,0 +1,42 @@
+# dsh-memory 的 bundle 补丁：只插一行宿主插件。
+#
+# 装上但没改这里时是**启用**状态（记忆插件本身是低风险的：只读 Markdown、
+# 只在每轮请求尾部追加一小段「记忆摘要」，预算 3 条 / 400 token）。
+# 想停掉：把 `disabled: false` 改成 `disabled: true`，或者整行删掉。
+#
+#   config:
+#     root: ''                 # 记忆仓库目录；空 = <DSH_HOME>\memory
+#     writeMode: semi          # manual 只手动记 / semi 自动抓进待确认箱 / auto 直接生效
+#     capture:
+#       minScore: 3            # 规则分门槛，低于它不收
+#       fromAssistant: true    # 也从助手的话里抽事实
+#     inject:
+#       maxItems: 3            # 每轮最多注入几条
+#       maxTokens: 400         # 注入预算
+#       includeMaps: true      # 把图折成一行带进来
+#     dedupe:
+#       merge: 0.82            # 相似度 ≥ 此值视为同一条，合并而不是新增
+#       related: 0.45          # ≥ 此值记一条「相关」
+#     panel:
+#       requireAuth: true      # 面板要不要账号密码（关掉就只靠本机 + 同源）
+#       user: owner            # 账号名
+- insert:
+    - id: dsh-memory
+      name: 'dsh-memory'
+      disabled: false
+      config:
+        root: ''
+        writeMode: 'semi'
+        capture:
+          minScore: 3
+          fromAssistant: true
+        inject:
+          maxItems: 3
+          maxTokens: 400
+          includeMaps: true
+        dedupe:
+          merge: 0.82
+          related: 0.45
+        panel:
+          requireAuth: true
+          user: 'owner'

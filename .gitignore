@@ -1,0 +1,50 @@
+# 依赖（可选：只在用向量检索时才有意义）
+node_modules/
+.junk/
+
+# 运行时产物：绝不能进版本库
+.tmp-home/
+*.log
+_distill-errors/
+.sessions-debug.json
+.vectors.json
+.panel-auth.json
+.panel-state.json
+config.json
+index.json
+.diag.json
+
+# 数据本身（仓库里的 Markdown 属于你自己的记忆，不进代码库）
+profile.md
+projects/
+scenes/
+pages/
+skills/
+inbox/
+daily/
+_journal/
+_archive/
+_trash/
+_sessions/
+_queue/
+_models/
+.models/
+persona.md
+projects.json
+_suggestions.json
+.auto-log.json
+.capture-state.json
+.capture-debug.json
+
+# 编辑器/系统
+.DS_Store
+Thumbs.db
+*.bak
+*.bak-*
+.p-*.mjs
+.patch-*.mjs
+.probe-*.mjs
+.scratch/
+DESIGN.md
+test/
+mockups/

@@ -1,0 +1,1680 @@
+/* ==========================================================================
+   我的记忆 · 面板原型 v2  —  共享结构 + 四套世界
+   结构一次做对：顶栏（含设置入口）、左栏、列表、详情、设置抽屉
+   世界只换：配色 / 字体 / 密度 / 材质
+   ========================================================================== */
+
+/* ---------- 1. 四个世界的令牌 ---------- */
+[data-world="a"]{
+  /* A · 纸感 —— 暖白纸、墨黑字、柔紫主色 */
+  --bg:#FBFAF7; --bg-2:#F5F3EE; --bg-3:#EFECE4;
+  --surface:#FFFFFF; --surface-2:#FBFAF7;
+  --line:#E4E0D5; --line-2:#D6D1C4;
+  --fg:#1C1B18; --fg-2:#4A4740; --fg-3:#6E6A60;
+  --accent:#5B4BC4; --accent-fg:#FFFFFF; --accent-soft:#EEEBFA;
+  --ok:#1F7A54; --ok-soft:#E2F1E9; --ok-fg:#FFFFFF;
+  --warn:#8A5A00; --warn-soft:#F8EEDC;
+  --sel:#FAF7FF; --ring:#5B4BC4;
+  --radius:10px; --radius-lg:14px; --radius-pill:999px;
+  --shadow-1:0 1px 2px rgba(28,27,24,.06), 0 4px 14px rgba(28,27,24,.05);
+  --shadow-2:0 2px 6px rgba(28,27,24,.07), 0 18px 44px rgba(28,27,24,.10);
+  --display:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;
+  --body:"Segoe UI","Microsoft YaHei UI",system-ui,sans-serif;
+  --mono:Consolas,"Cascadia Mono",monospace;
+  --row-pad:15px; --list-gap:8px;
+  --glass:none;
+}
+[data-world="b"]{
+  /* B · 深色 —— 近黑底、紫蓝微光、卡片分层 */
+  --bg:#0C0E13; --bg-2:#11141B; --bg-3:#171B24;
+  --surface:#141821; --surface-2:#181D28;
+  --line:#232936; --line-2:#2E3545;
+  --fg:#EAEDF5; --fg-2:#B6BFD0; --fg-3:#7C879B;
+  --accent:#8B7CF8; --accent-fg:#0B0C11; --accent-soft:#221F3A;
+  --ok:#3DD68C; --ok-soft:#12291F; --ok-fg:#04120B;
+  --warn:#F2C14E; --warn-soft:#2A2314;
+  --sel:#1B2030; --ring:#8B7CF8;
+  --radius:10px; --radius-lg:14px; --radius-pill:999px;
+  --shadow-1:0 1px 2px rgba(0,0,0,.5), 0 4px 10px rgba(0,0,0,.32);
+  --shadow-2:0 4px 10px rgba(0,0,0,.5), 0 24px 60px rgba(0,0,0,.55);
+  --display:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;
+  --body:"Segoe UI","Microsoft YaHei UI",system-ui,sans-serif;
+  --mono:Consolas,"Cascadia Mono",monospace;
+  --row-pad:15px; --list-gap:8px;
+  --glass:rgba(255,255,255,.045);
+}
+[data-world="c"]{
+  /* C · 密集 —— GitHub 表骨架、零装饰、最高信息密度 */
+  --bg:#FFFFFF; --bg-2:#F6F8FA; --bg-3:#EAEEF2;
+  --surface:#FFFFFF; --surface-2:#F6F8FA;
+  --line:#D0D7DE; --line-2:#AFB8C1;
+  --fg:#1F2328; --fg-2:#3D444D; --fg-3:#59636E;
+  --accent:#0969DA; --accent-fg:#FFFFFF; --accent-soft:#DDF4FF;
+  --ok:#1A7F37; --ok-soft:#DAFBE1; --ok-fg:#FFFFFF;
+  --warn:#9A6700; --warn-soft:#FFF8C5;
+  --sel:#DDF4FF; --ring:#0969DA;
+  --radius:6px; --radius-lg:8px; --radius-pill:999px;
+  --shadow-1:0 1px 0 rgba(31,35,40,.04);
+  --shadow-2:0 8px 24px rgba(140,149,159,.2);
+  --display:"Segoe UI",system-ui,sans-serif;
+  --body:"Segoe UI","Microsoft YaHei UI",system-ui,sans-serif;
+  --mono:Consolas,"Cascadia Mono",monospace;
+  --row-pad:8px; --list-gap:0px;
+  --glass:none;
+}
+[data-world="d"],[data-world="g"]{
+  /* D · 液态玻璃 —— 彩色光斑透过多层磨砂 */
+  --bg:#07080D; --bg-2:#0B0D14; --bg-3:#10141D;
+  --surface:rgba(255,255,255,.055); --surface-2:rgba(255,255,255,.035);
+  --line:rgba(255,255,255,.10); --line-2:rgba(255,255,255,.16);
+  --fg:#F2F4FA; --fg-2:#CFD6E4; --fg-3:#A3ACBF;
+  --accent:#A796FF; --accent-fg:#0A0B10; --accent-soft:rgba(167,150,255,.18);
+  --ok:#5EE6A8; --ok-soft:rgba(94,230,168,.14); --ok-fg:#04120B;
+  --warn:#FFD166; --warn-soft:rgba(255,209,102,.14);
+  --sel:rgba(255,255,255,.085); --ring:#A796FF;
+  --radius:12px; --radius-lg:18px; --radius-pill:999px;
+  --shadow-1:0 1px 2px rgba(0,0,0,.4), 0 6px 14px rgba(0,0,0,.28);
+  --shadow-2:0 20px 60px rgba(0,0,0,.55);
+  --display:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;
+  --body:"Segoe UI","Microsoft YaHei UI",system-ui,sans-serif;
+  --mono:Consolas,"Cascadia Mono",monospace;
+  --row-pad:15px; --list-gap:8px;
+  --glass:rgba(255,255,255,.06);
+}
+
+/* ---------- 2. 基础 ---------- */
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font-family:var(--body); font-size:calc(13px * var(--fs-k, 1)); line-height:1.5;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  font-variant-numeric:tabular-nums;
+}
+::selection{background:var(--accent); color:var(--accent-fg)}
+:focus-visible{outline:2px solid var(--ring); outline-offset:2px; border-radius:4px}
+button{font:inherit; color:inherit; background:none; border:0; cursor:pointer}
+a{color:inherit}
+h1,h2,h3,p,dl,dd,dt,ul,ol{margin:0}
+ul,ol{list-style:none; padding:0}
+.i{width:16px;height:16px;flex:none;display:inline-block;vertical-align:-3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+
+/* 滚动条 / 光标 / 下划线偏移 —— 属于设计的部分 */
+*{scrollbar-width:thin; scrollbar-color:var(--line-2) transparent}
+*::-webkit-scrollbar{width:10px;height:10px}
+*::-webkit-scrollbar-thumb{background:var(--line-2); border-radius:99px; border:3px solid transparent; background-clip:content-box}
+*::-webkit-scrollbar-thumb:hover{background:var(--fg-3); background-clip:content-box}
+*::-webkit-scrollbar-track{background:transparent}
+a,button,summary{text-underline-offset:3px}
+
+/* ---------- 3. 外壳 ---------- */
+.shell{display:grid; grid-template-columns:236px minmax(0,1fr) 344px; grid-template-rows:56px 1fr; height:100%; min-height:100vh}
+[data-world="d"] .shell,[data-world="g"] .shell{grid-template-rows:60px 1fr; gap:0 14px; padding:14px 14px 14px 0}
+[data-world="d"] .topbar,[data-world="g"] .topbar{grid-column:1/-1}
+
+/* --- 顶栏 --- */
+.topbar{
+  grid-column:1/-1; display:flex; align-items:center; gap:12px;
+  padding:0 14px 0 16px; border-bottom:1px solid var(--line);
+  background:var(--bg-2); position:relative; z-index:5;
+}
+[data-world="d"] .topbar,[data-world="g"] .topbar{
+  background:var(--glass);
+  border:1px solid var(--line); border-radius:var(--radius-lg);
+  padding:0 18px; grid-column:1/-1;
+}
+.brand{display:flex; align-items:center; gap:9px; padding-right:14px; margin-right:2px; border-right:1px solid var(--line)}
+.brand .mark{width:24px;height:24px;border-radius:7px;background:linear-gradient(150deg,var(--accent),color-mix(in oklab,var(--accent) 55%, #000));
+  display:grid;place-items:center;color:var(--accent-fg); box-shadow:inset 0 1px 0 rgba(255,255,255,.28)}
+.brand .mark svg{width:14px;height:14px}
+.brand b{font-family:var(--display); font-size:calc(14.5px * var(--fs-k, 1)); font-weight:640; letter-spacing:-.01em}
+.crumb{display:flex; align-items:center; gap:7px; color:var(--fg-3); font-size:calc(12.5px * var(--fs-k, 1)); white-space:nowrap}
+.crumb strong{color:var(--fg); font-weight:560}
+.crumb .sep{opacity:.5}
+
+.search{position:relative; flex:1; max-width:520px; margin-left:6px}
+.search .i{position:absolute; left:11px; top:50%; translate:0 -50%; color:var(--fg-3)}
+.search input{
+  width:100%; height:34px; padding:0 62px 0 34px; border-radius:9px;
+  border:1px solid var(--line); background:var(--surface); color:var(--fg);
+  font:inherit; font-size:calc(12.5px * var(--fs-k, 1));
+}
+.search input::placeholder{color:var(--fg-3)}
+.search input:focus{border-color:var(--accent); outline:none; box-shadow:0 0 0 3px var(--accent-soft)}
+.kbd{
+  position:absolute; right:9px; top:50%; translate:0 -50%;
+  font-family:var(--mono); font-size:calc(12px * var(--fs-k, 1)); color:var(--fg-3);
+  border:1px solid var(--line); border-radius:5px; padding:1px 5px; background:var(--bg-2);
+}
+.topbar .grow{flex:1}
+
+/* 顶栏按钮 */
+.btn{
+  display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 11px;
+  border-radius:8px; border:1px solid var(--line); background:var(--surface);
+  color:var(--fg-2); font-size:calc(12.5px * var(--fs-k, 1)); font-weight:520; white-space:nowrap;
+  transition:background .14s, border-color .14s, color .14s;
+}
+.btn:hover{background:var(--bg-3); color:var(--fg); border-color:var(--line-2)}
+.btn .i{color:var(--fg-3)}
+.btn:hover .i{color:var(--fg)}
+.btn.primary{background:var(--accent); border-color:transparent; color:var(--accent-fg); font-weight:600;
+  box-shadow:0 1px 0 rgba(255,255,255,.18) inset, 0 2px 6px rgba(0,0,0,.22)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.primary .i{color:currentColor}
+.btn.ghost{border-color:transparent; background:transparent}
+.btn.ghost:hover{background:var(--bg-3)}
+.btn.icon{width:32px; padding:0; justify-content:center}
+/* 设置入口：默认就写「设置」两个字，不靠猜齿轮 */
+.btn.settings{border-color:var(--line-2); background:var(--surface-2); font-weight:560}
+.btn.settings[aria-expanded="true"]{border-color:var(--accent); color:var(--fg); background:var(--accent-soft)}
+
+/* --- 左栏 --- */
+.rail{
+  border-right:1px solid var(--line); background:var(--bg-2);
+  display:flex; flex-direction:column; min-height:0; padding:10px 10px 8px;
+  overflow:auto;
+}
+[data-world="d"] .rail,[data-world="g"] .rail{
+  background:var(--glass);
+  border:1px solid var(--line); border-radius:var(--radius-lg);
+  padding:14px 12px 10px; box-shadow:inset 0 1px 0 rgba(255,255,255,.14), var(--shadow-1);
+}
+.rail h3{
+  font-size:calc(12px * var(--fs-k, 1)); font-weight:640; color:var(--fg-3); letter-spacing:.06em;
+  padding:10px 8px 6px;
+}
+.rail ul{display:flex; flex-direction:column; gap:1px}
+.rail a,.rail button{
+  display:flex; align-items:center; gap:9px; width:100%; height:31px; padding:0 8px;
+  border-radius:8px; color:var(--fg-2); font-size:calc(12.5px * var(--fs-k, 1)); text-decoration:none; text-align:left;
+}
+.rail a .i,.rail button .i{color:var(--fg-3); width:15px; height:15px}
+.rail a:hover,.rail button:hover{background:var(--bg-3); color:var(--fg)}
+.rail .n{margin-left:auto; font-family:var(--mono); font-size:calc(12px * var(--fs-k, 1)); color:var(--fg-3)}
+.rail .on{background:var(--accent-soft); color:var(--fg); font-weight:560}
+.rail .on .i,.rail .on .n{color:var(--accent)}
+[data-world="c"] .rail .on{background:var(--accent-soft); box-shadow:inset 2px 0 0 var(--accent)}
+[data-world="c"] .rail .on{box-shadow:none; border:1px solid color-mix(in oklab,var(--accent) 40%, transparent)}
+.rail .dot{width:6px;height:6px;border-radius:50%;background:var(--ok); box-shadow:0 0 0 3px var(--ok-soft); margin-left:auto}
+.rail .div{height:1px; background:var(--line); margin:10px 6px}
+.rail .foot{margin-top:auto; padding-top:10px; display:flex; flex-direction:column; gap:1px}
+.rail .status{
+  display:flex; align-items:center; gap:7px; padding:7px 8px; font-size:calc(12px * var(--fs-k, 1)); color:var(--fg-3);
+}
+
+/* --- 中栏列表 --- */
+.listpane{display:flex; flex-direction:column; min-height:0; background:var(--bg)}
+[data-world="d"] .listpane,[data-world="g"] .listpane{
+  background:rgba(9,11,18,.34); border:1px solid var(--line); border-radius:var(--radius-lg);
+  overflow:hidden;
+}
+.listhead{
+  display:flex; align-items:center; gap:10px; padding:12px 16px 10px;
+  border-bottom:1px solid var(--line); background:color-mix(in oklab,var(--bg) 88%, transparent);
+}
+[data-world="c"] .listhead{padding:10px 14px; background:var(--bg-2)}
+[data-world="d"] .listhead,[data-world="g"] .listhead{background:transparent; border-bottom-color:var(--line)}
+.listhead .t{display:flex; align-items:baseline; gap:9px; min-width:0}
+.listhead h2{font-family:var(--display); font-size:calc(15.5px * var(--fs-k, 1)); font-weight:650; letter-spacing:-.01em; white-space:nowrap}
+.listhead .meta{font-size:calc(12px * var(--fs-k, 1)); color:var(--fg-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.listhead .acts{margin-left:auto; display:flex; align-items:center; gap:7px}
+
+.filters{display:flex; align-items:center; gap:6px; padding:9px 16px; border-bottom:1px solid var(--line); flex-wrap:wrap}
+[data-world="c"] .filters{padding:7px 14px; background:var(--bg-2)}
+.chip{
+  display:inline-flex; align-items:center; gap:6px; height:27px; padding:0 11px;
+  border-radius:var(--radius-pill); border:1px solid var(--line); background:var(--surface);
+  font-size:calc(12.5px * var(--fs-k, 1)); color:var(--fg-2);
+}
+.chip .c{font-family:var(--mono); font-size:calc(12px * var(--fs-k, 1)); color:var(--fg-3)}
+.chip[aria-pressed="true"]{background:var(--fg); color:var(--bg); border-color:var(--fg)}
+.chip[aria-pressed="true"] .c{color:color-mix(in oklab,var(--bg) 70%, var(--fg))}
+.chip:hover{border-color:var(--line-2)}
+.filters .right{margin-left:auto; display:flex; gap:6px; align-items:center; font-size:calc(12px * var(--fs-k, 1)); color:var(--fg-3)}
+
+.rows{flex:1; overflow:auto; padding:10px 16px 90px; display:flex; flex-direction:column; gap:var(--list-gap);
+  overscroll-behavior:contain; contain:paint}
+[data-world="c"] .rows{padding:0}
+
+/* 列表行（A/B/D 卡片式） */
+.row{
+  position:relative; display:block; width:100%; text-align:left;
+  padding:var(--row-pad) 14px; border-radius:var(--radius);
+  border:1px solid transparent; background:var(--surface);
+  box-shadow:var(--shadow-1); transition:background .12s, border-color .12s;
+  contain:layout style;
+}
+[data-world="c"] .row{
+  border-radius:0; border:0; border-bottom:1px solid var(--line); box-shadow:none;
+  padding:var(--row-pad) 14px; background:transparent;
+}
+[data-world="d"] .row,[data-world="g"] .row{
+  background:rgba(255,255,255,.045);
+  border-color:var(--line); box-shadow:inset 0 1px 0 rgba(255,255,255,.10);
+}
+.row:hover{background:var(--bg-3); border-color:var(--line-2)}
+[data-world="c"] .row:hover{background:var(--bg-2)}
+.row[aria-selected="true"]{
+  background:var(--sel); border-color:color-mix(in oklab,var(--accent) 45%, transparent);
+  box-shadow:0 0 0 1px color-mix(in oklab,var(--accent) 30%, transparent), var(--shadow-1);
+}
+[data-world="c"] .row[aria-selected="true"]{box-shadow:inset 2px 0 0 var(--accent)}
+.row .line1{display:flex; align-items:baseline; gap:9px}
+.row .ttl{
+  font-size:calc(13.5px * var(--fs-k, 1)); font-weight:590; color:var(--fg); letter-spacing:-.005em;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.row[aria-selected="true"] .ttl{font-weight:620}
+.row .st{font-size:calc(12px * var(--fs-k, 1)); font-weight:640; color:var(--accent); white-space:nowrap}
+.row .sub{
+  margin:4px 0 0; font-size:calc(12.2px * var(--fs-k, 1)); color:var(--fg-2); line-height:1.5;
+  display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden;
+}
+.row .line3{display:flex; align-items:center; gap:7px; margin-top:9px; flex-wrap:wrap}
+[data-world="c"] .row .line3{margin-top:5px}
+.pill{
+  display:inline-flex; align-items:center; height:21px; padding:0 8px; border-radius:var(--radius-pill);
+  font-size:calc(12px * var(--fs-k, 1)); font-weight:520; color:var(--fg-2); background:var(--bg-3); border:1px solid transparent;
+  max-width:190px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.pill.type{background:var(--accent-soft); color:var(--accent)}
+.pill.scope{border-color:var(--line); background:transparent}
+.pill.scope.proj{background:var(--bg-3)}
+.pill.warn{background:var(--warn-soft); color:var(--warn)}
+.pill.ok{background:var(--ok-soft); color:var(--ok)}
+.why{font-size:calc(12px * var(--fs-k, 1)); color:var(--fg-3); display:inline-flex; align-items:center; gap:5px; min-width:0}
+.why b{font-weight:600; color:var(--fg-2); font-family:var(--mono); font-size:calc(12px * var(--fs-k, 1))}
+.why .hit{background:var(--warn-soft); color:var(--warn); border-radius:3px; padding:0 3px}
+.row .time{margin-left:auto; font-family:var(--mono); font-size:calc(12px * var(--fs-k, 1)); color:var(--fg-3); white-space:nowrap}
+.row .quick{position:absolute; right:12px; top:12px; display:flex; gap:6px; opacity:0; transition:opacity .12s}
+.row:hover .quick,.row[aria-selected="true"] .quick{opacity:1}
+.mini{
+  display:inline-flex; align-items:center; gap:4px; height:24px; padding:0 8px; border-radius:6px;
+  font-size:calc(12px * var(--fs-k, 1)); font-weight:600; border:1px solid var(--line); background:var(--surface); color:var(--fg-2);
+}
+.mini.yes{background:var(--ok-soft); color:var(--ok); border-color:color-mix(in oklab,var(--ok) 35%, transparent)}
+.mini:hover{filter:brightness(1.05); border-color:var(--line-2)}
+
+/* C 的表格骨架 */
+[data-world="c"] .rows{display:block}
+[data-world="c"] thead th{
+  position:sticky; top:0; z-index:2; background:var(--bg-2); text-align:left;
+  font-size:calc(12px * var(--fs-k, 1)); font-weight:620; color:var(--fg-3); padding:8px 12px; border-bottom:1px solid var(--line);
+  white-space:nowrap;
+}
+[data-world="c"] td{padding:9px 12px; border-bottom:1px solid var(--line); vertical-align:top; font-size:calc(12.5px * var(--fs-k, 1))}
+[data-world="c"] tbody tr{cursor:pointer}
+[data-world="c"] tbody tr:hover{background:var(--bg-2)}
+[data-world="c"] tbody tr[aria-selected="true"]{background:var(--sel); box-shadow:inset 2px 0 0 var(--accent)}
+[data-world="c"] .cell-t{font-weight:580; color:var(--fg); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+[data-world="c"] .cell-s{color:var(--fg-2); font-size:calc(12px * var(--fs-k, 1)); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+
+.listfoot{
+  display:flex; align-items:center; gap:10px; padding:7px 16px; border-top:1px solid var(--line);
+  font-size:calc(12px * var(--fs-k, 1)); color:var(--fg-3); background:var(--bg-2);
+}
+.listfoot kbd{font-family:var(--mono); font-size:calc(12px * var(--fs-k, 1)); border:1px solid var(--line); border-radius:4px; padding:0 4px; background:var(--surface)}
+.listfoot .right{margin-left:auto}
+
+/* --- 右栏详情 --- */
+.detail{display:flex; flex-direction:column; min-height:0; border-left:1px solid var(--line); background:var(--bg-2)}
+[data-world="d"] .detail,[data-world="g"] .detail{
+  background:var(--glass);
+  border:1px solid var(--line); border-radius:var(--radius-lg);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 8px 20px rgba(0,0,0,.34);
+}
+.detail .body{overflow:auto; padding:14px 18px 14px; display:flex; flex-direction:column; gap:10px}
+.detail .head{display:flex; flex-direction:column; gap:8px}
+.detail .idline{display:flex; align-items:center; gap:8px; color:var(--fg-3); font-size:calc(12px * var(--fs-k, 1))}
+.detail .idline .num{font-family:var(--mono); font-size:calc(12px * var(--fs-k, 1)); color:var(--fg-2)}
+.detail h1{
+  font-family:var(--display); font-size:calc(16.5px * var(--fs-k, 1)); font-weight:650; line-height:1.38;
+  letter-spacing:-.012em; text-wrap:balance; max-width:34ch;
+}
+.detail .pills{display:flex; gap:6px; flex-wrap:wrap}
+.sect{border-top:1px solid var(--line); padding-top:10px}
+.sect:first-of-type{border-top:0; padding-top:0}
+.sect .sect-t{
+  font-size:calc(12px * var(--fs-k, 1)); font-weight:640; color:var(--fg-3); letter-spacing:.04em; margin-bottom:7px;
+  font-family:var(--body); line-height:1.5;
+}
+.sect p{font-size:calc(12.6px * var(--fs-k, 1)); color:var(--fg-2); line-height:1.66; max-width:66ch}
+.sect p + p{margin-top:8px}
+.sect code{font-family:var(--mono); font-size:calc(12px * var(--fs-k, 1)); background:var(--bg-3); padding:1px 5px; border-radius:4px; color:var(--fg)}
+.figure{
+  display:flex; align-items:center; gap:10px; padding:14px 14px; border-radius:var(--radius);
+  border:1px dashed var(--line-2); background:var(--surface-2); color:var(--fg-3); font-size:calc(12px * var(--fs-k, 1));
+}
+.figure .i{color:var(--fg-3)}
+.props{display:grid; grid-template-columns:68px 1fr; gap:7px 12px; font-size:calc(12.5px * var(--fs-k, 1))}
+.props dt{color:var(--fg-3); font-size:calc(12px * var(--fs-k, 1)); padding-top:1px}
+.props dd{color:var(--fg-2); min-width:0; overflow:hidden; text-overflow:ellipsis}
+.props dd.mono{font-family:var(--mono); font-size:calc(12px * var(--fs-k, 1))}
+.props .path{display:inline-flex; align-items:center; gap:5px}
+.detail .actionbar{
+  margin-top:auto; display:flex; align-items:center; gap:8px; padding:11px 18px;
+  border-top:1px solid var(--line); background:color-mix(in oklab,var(--bg-2) 92%, transparent);
+}
+.detail .actionbar .note{margin-top:0; font-size:calc(12px * var(--fs-k, 1)); color:var(--fg-3); margin-left:auto}
+.detail .actionbar .btn.yes{background:var(--ok); border-color:transparent; color:var(--ok-fg); font-weight:640}
+.btn.danger:hover{background:var(--warn-soft); border-color:var(--warn); color:var(--warn)}
+.empty{padding:40px 20px; text-align:center; color:var(--fg-3); font-size:calc(12px * var(--fs-k, 1))}
+.empty .i{width:22px;height:22px;margin-bottom:8px;opacity:.7}
+
+/* ---------- 4. 设置抽屉 ---------- */
+.scrim-bg{
+  position:fixed; inset:0; background:rgba(8,9,13,.42); opacity:0; pointer-events:none;
+  transition:opacity .22s cubic-bezier(.16,1,.3,1); z-index:40;
+}
+.scrim-bg.on{opacity:1; pointer-events:auto}
+.drawer{
+  position:fixed; top:0; right:0; height:100%; width:min(430px,92vw); z-index:50;
+  display:flex; flex-direction:column; background:var(--bg);
+  border-left:1px solid var(--line); box-shadow:var(--shadow-2);
+  translate:100% 0; transition:translate .28s cubic-bezier(.16,1,.3,1);
+}
+[data-world="d"] .drawer,[data-world="g"] .drawer{
+  margin:14px; height:calc(100% - 28px); border-radius:var(--radius-lg);
+  border:1px solid var(--line-2); background:rgba(11,13,20,.86);
+}
+.drawer.on{translate:0 0}
+.drawer:focus,.drawer:focus-visible{outline:none}   /* 容器不画焦点环，交互元素照常 */
+.drawer header{
+  display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--line);
+}
+.drawer header h2{font-family:var(--display); font-size:calc(14.5px * var(--fs-k, 1)); font-weight:650}
+.drawer header .x{margin-left:auto}
+.drawer .scroll{overflow:auto; padding:6px 16px 20px}
+.grp{padding:14px 0; border-bottom:1px solid var(--line)}
+.grp:last-child{border-bottom:0}
+.grp h3{font-size:calc(12px * var(--fs-k, 1)); font-weight:640; color:var(--fg-3); letter-spacing:.04em; margin-bottom:10px}
+.fld{display:flex; align-items:flex-start; gap:12px; padding:7px 0}
+.fld .lab{flex:1; min-width:0}
+.fld .lab b{display:block; font-size:calc(12.5px * var(--fs-k, 1)); font-weight:560; color:var(--fg)}
+.fld .lab span{display:block; font-size:calc(12px * var(--fs-k, 1)); color:var(--fg-3); margin-top:2px; line-height:1.5}
+.seg{display:inline-flex; padding:3px; border-radius:9px; border:1px solid var(--line); background:var(--bg-2); gap:3px}
+.seg button{height:24px; padding:0 10px; border-radius:6px; font-size:calc(12px * var(--fs-k, 1)); color:var(--fg-2)}
+.seg button[aria-pressed="true"]{background:var(--surface); color:var(--fg); font-weight:600; box-shadow:var(--shadow-1)}
+.switch{
+  width:36px; height:20px; border-radius:99px; background:var(--line-2); position:relative; flex:none;
+  transition:background .16s; margin-top:2px;
+}
+.switch::after{
+  content:""; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%;
+  background:#fff; transition:translate .18s cubic-bezier(.16,1,.3,1); box-shadow:0 1px 3px rgba(0,0,0,.35);
+}
+.switch[aria-checked="true"]{background:var(--accent)}
+.switch[aria-checked="true"]::after{translate:16px 0}
+.drawer .path{
+  display:flex; align-items:center; gap:7px; font-family:var(--mono); font-size:calc(12px * var(--fs-k, 1));
+  background:var(--bg-2); border:1px solid var(--line); border-radius:7px; padding:7px 9px; color:var(--fg-2);
+  margin-top:6px;
+}
+.drawer .path .i{color:var(--fg-3)}
+.drawer footer{padding:12px 16px; border-top:1px solid var(--line); display:flex; gap:8px; align-items:center}
+.drawer footer .hint{font-size:calc(12px * var(--fs-k, 1)); color:var(--fg-3); margin-right:auto}
+
+/* ---------- 6. 响应式 ---------- */
+@media (max-width:1180px){
+  .shell{grid-template-columns:220px minmax(0,1fr) 316px}
+}
+@media (max-width:1000px){
+  .shell{grid-template-columns:64px minmax(0,1fr)}
+  .rail h3,.rail .n,.rail a span,.rail button span,.rail .status span{display:none}
+  .rail a,.rail button{justify-content:center; padding:0}
+  .detail{position:fixed; inset:56px 0 0 auto; width:min(420px,92vw); z-index:20; translate:100% 0}
+  .detail.on{translate:0 0}
+  .crumb .sep,.crumb strong{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important; animation:none!important}
+}
+/* 系统「减少透明效果」时，玻璃退回实体 */
+@media (prefers-reduced-transparency:reduce){
+[data-world="d"] .rail,[data-world="g"] .rail,[data-world="d"] .detail,[data-world="g"] .detail,[data-world="d"] .topbar,[data-world="g"] .topbar{
+    backdrop-filter:none; background:var(--bg-2);
+  }
+}
+
+/* ---------- 7. 两种列表骨架互斥 / 详情底栏换行 ---------- */
+table.rows{display:none; width:100%; table-layout:fixed; border-collapse:separate; border-spacing:0}
+.tablewrap{display:none; flex:1; min-height:0; overflow:auto}
+[data-world="c"] .tablewrap{display:block}
+[data-world="c"] thead th,[data-world="c"] td{overflow:hidden}
+[data-world="c"] td .mini{vertical-align:middle}
+[data-world="c"] table.rows{display:table}
+[data-world="c"] .rows.cards{display:none}
+.detail .actionbar{flex-wrap:wrap; row-gap:9px}
+.detail .actionbar .note{flex-basis:100%; margin-left:0; margin-top:0; line-height:1.5}
+
+/* D：行不叠玻璃，只做分隔与悬停色 —— 卡片只存在于面板层 */
+[data-world="d"] .row,[data-world="g"] .row{
+  background:transparent; backdrop-filter:none; border-color:transparent;
+  box-shadow:none; border-bottom:1px solid var(--line); border-radius:0;
+}
+[data-world="d"] .row:hover,[data-world="g"] .row:hover{background:rgba(255,255,255,.05)}
+[data-world="d"] .row[aria-selected="true"],[data-world="g"] .row[aria-selected="true"]{
+  background:rgba(255,255,255,.09); border-color:transparent;
+  box-shadow:inset 2px 0 0 var(--accent);
+}
+[data-world="d"] .rows,[data-world="g"] .rows{padding:0 0 40px}
+/* 元信息统一 12px（探测器的 body 下限），正文 12.5–13px */
+.pill,.why,.row .time,.chip .c,.sect .sect-t,.grp h3,.drawer footer .hint,.rail .n,.listhead .meta,.rail .status,.detail .idline,.drawer .path{font-size:calc(12px * var(--fs-k, 1))}
+.pill{height:22px}
+/* ============================================================
+   v3 追加：① 去掉了 c 世界 ② 版式轴 = 纸感/玻璃（d 深玻璃，g 浅玻璃）
+   ③ 玻璃透明度可变 ④ 背景图（本地图片）⑤ 主题色选择器 ⑥ 登录页
+   ============================================================ */
+
+/* --- 浅色玻璃世界（g）：和 a 同一套明暗，但面板是磨砂 --- */
+[data-world="g"]{
+  --bg:#E9E6DC; --bg-2:#F2EFE7; --bg-3:#E2DED1;
+  --surface:rgba(255,255,255,.62); --surface-2:rgba(255,255,255,.44); --surface-3:rgba(255,255,255,.30);
+  --line:rgba(28,27,24,.12); --line-2:rgba(28,27,24,.20);
+  --fg:#1C1B18; --fg-2:#403D36; --fg-3:#5F5B52;
+  --accent:#5B4BC4; --accent-fg:#FFFFFF; --accent-soft:rgba(91,75,196,.12);
+  --ok:#166B49; --ok-soft:rgba(22,107,73,.12); --ok-fg:#FFFFFF;
+  --warn:#7A4F00; --warn-soft:rgba(122,79,0,.12);
+  --sel:rgba(91,75,196,.10); --ring:#5B4BC4;
+  --radius:12px; --radius-lg:18px; --radius-pill:999px;
+  --shadow-1:0 1px 2px rgba(40,36,28,.10);
+  --shadow-2:0 14px 34px rgba(40,36,28,.18);
+  --display:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;
+  --body:"Segoe UI","Microsoft YaHei UI",system-ui,sans-serif;
+  --mono:Consolas,"Cascadia Mono",monospace;
+  --row-pad:15px; --list-gap:8px;
+  --glass:rgba(255,255,255,.34);
+  --glass-base:#FFFFFF; --glass-alpha:.42;
+  --glass-line:rgba(255,255,255,.55);
+  --glass-hi:rgba(255,255,255,.70);
+}
+:is([data-world="d"],[data-world="g"]){ --glass-base:#0B0D14; --glass-alpha:.34; }
+[data-world="d"]{ --glass-base:#0B0D14; --glass-alpha:.34; --glass-line:rgba(255,255,255,.10); --glass-hi:rgba(255,255,255,.14) }
+
+/* --- 版式轴：玻璃世界的布局（修正 D 的重叠：顶栏独占第 1 行，三个面板在第 2 行） --- */
+:is([data-world="d"],[data-world="g"]) .shell{
+  grid-template-rows:auto minmax(0,1fr);
+  gap:12px 12px; padding:14px 14px 14px 0;
+}
+:is([data-world="d"],[data-world="g"]) .topbar{grid-row:1; grid-column:1/-1}
+:is([data-world="d"],[data-world="g"]) .rail,
+:is([data-world="d"],[data-world="g"]) .listpane,
+:is([data-world="d"],[data-world="g"]) .detail{
+  grid-row:2; min-height:0; height:100%; overflow:hidden;
+}
+:is([data-world="d"],[data-world="g"]) .rail{padding-left:12px; overflow:auto}
+
+:is([data-world="d"],[data-world="g"]) .detail{border-left:0}
+
+/* 背景图（本地图片）—— 垫在最底层，上面压一层对比遮罩 */
+body::before{
+  content:""; position:fixed; inset:0; z-index:-3; pointer-events:none;
+  background-image:var(--bg-image, none); background-size:cover; background-position:center;
+  opacity:var(--bg-image-opacity,.55);
+}
+/* 只有玻璃世界把背景预先糊掉（纸感要保持照片清晰 —— 那是它跟玻璃的核心差别） */
+body[data-world="d"]::before,
+body[data-world="g"]::before{ filter: blur(18px) saturate(150%) }
+body::after{
+  content:""; position:fixed; inset:0; z-index:-2; pointer-events:none;
+  background:var(--bg-image-scrim, transparent);
+}
+
+/* --- 主题色选择器 --- */
+.swatches{display:flex; align-items:center; gap:7px; flex-wrap:wrap}
+.sw{
+  width:22px; height:22px; border-radius:50%; border:1px solid rgba(0,0,0,.18);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35); position:relative;
+}
+.sw[aria-pressed="true"]::after{
+  content:""; position:absolute; inset:-4px; border-radius:50%; border:2px solid var(--accent);
+}
+.sw.plus{display:grid; place-items:center; background:var(--surface); color:var(--fg-3); font-size:calc(14px * var(--fs-k, 1)); line-height:1}
+.rangewrap{display:flex; align-items:center; gap:9px}
+.range-val{font-family:var(--mono); font-size:calc(12px * var(--fs-k, 1)); color:var(--fg-3); min-width:38px; text-align:right}
+.thumb{
+  width:46px; height:32px; border-radius:7px; border:1px solid var(--line); flex:none;
+  background:var(--bg-3) center/cover no-repeat; display:grid; place-items:center; color:var(--fg-3);
+}
+
+/* --- 登录页 --- */
+body.auth-body{
+  min-height:100vh; display:grid; place-items:center; padding:40px 20px;
+  background-color:transparent;   /* 让身体层的渐变/背景图透上来 */
+}
+.authcard{
+  width:min(392px,94vw); display:flex; flex-direction:column; gap:0;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+  box-shadow:0 4px 12px rgba(0,0,0,.16); padding:26px 26px 22px;
+}
+body[data-world="d"] .authcard{
+  background:rgba(12,14,22,.52);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14);
+}
+body[data-world="g"] .authcard{
+  background:rgba(255,255,255,.56);
+  border:1px solid rgba(255,255,255,.72);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+}
+.auth-body .brandline{display:flex; align-items:center; gap:10px; margin-bottom:18px}
+.auth-body .brandline .mark{
+  width:30px;height:30px;border-radius:9px;
+  background:linear-gradient(150deg,var(--accent),color-mix(in oklab,var(--accent) 55%, #000));
+  display:grid;place-items:center;color:var(--accent-fg); box-shadow:inset 0 1px 0 rgba(255,255,255,.28);
+}
+.auth-body .brandline .mark svg{width:16px;height:16px}
+.auth-body .brandline b{font-family:var(--display); font-size:calc(15px * var(--fs-k, 1)); font-weight:650}
+.auth-body h1{font-family:var(--display); font-size:calc(19px * var(--fs-k, 1)); font-weight:660; letter-spacing:-.015em; margin-bottom:5px}
+.auth-body .sub{font-size:calc(12.5px * var(--fs-k, 1)); color:var(--fg-3); line-height:1.6; margin-bottom:18px}
+.auth-body .field{display:flex; flex-direction:column; gap:6px; margin-bottom:12px}
+.auth-body .field label{font-size:calc(12.5px * var(--fs-k, 1)); color:var(--fg-2); font-weight:540}
+.auth-body .field input{
+  height:38px; padding:0 11px; border-radius:9px; border:1px solid var(--line);
+  background:var(--surface-2); color:var(--fg); font:inherit; font-size:calc(13px * var(--fs-k, 1));
+}
+.auth-body .field input::placeholder{color:var(--fg-3)}
+.auth-body .field input:focus{border-color:var(--accent); outline:none; box-shadow:0 0 0 3px var(--accent-soft)}
+.auth-body .field input[aria-invalid="true"]{border-color:var(--warn); box-shadow:0 0 0 3px var(--warn-soft)}
+.auth-body .err{
+  display:flex; align-items:flex-start; gap:7px; font-size:calc(12.5px * var(--fs-k, 1)); color:var(--warn);
+  background:var(--warn-soft); border:1px solid color-mix(in oklab, var(--warn) 30%, transparent);
+  border-radius:8px; padding:8px 10px; margin-bottom:12px; line-height:1.5;
+}
+.auth-body .row{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:2px 0 16px}
+.auth-body .row .chk{display:flex; align-items:center; gap:7px; font-size:calc(12.5px * var(--fs-k, 1)); color:var(--fg-2)}
+.auth-body .row a{font-size:calc(12.5px * var(--fs-k, 1)); color:var(--fg-3); text-decoration:underline; text-underline-offset:3px}
+.auth-body .row a:hover{color:var(--fg)}
+.auth-body button.submit{
+  height:38px; border-radius:9px; background:var(--accent); color:var(--accent-fg);
+  font-size:calc(13px * var(--fs-k, 1)); font-weight:640; border:1px solid transparent;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 2px 6px rgba(0,0,0,.22);
+}
+.auth-body button.submit:hover{filter:brightness(1.07)}
+.auth-body .foot{margin-top:16px; font-size:calc(12px * var(--fs-k, 1)); color:var(--fg-3); text-align:center; line-height:1.6}
+.auth-body .lock{
+  display:flex; align-items:flex-start; gap:8px; font-size:calc(12.5px * var(--fs-k, 1)); line-height:1.55;
+  color:var(--fg-2); background:var(--bg-2); border:1px solid var(--line);
+  border-radius:8px; padding:9px 10px; margin-bottom:14px;
+}
+.auth-body .lock .i{color:var(--warn); margin-top:1px}
+.theme-fab{
+  position:fixed; right:16px; top:16px; display:flex; gap:6px; z-index:20;
+  padding:5px; border-radius:10px; background:var(--surface); border:1px solid var(--line);
+  box-shadow:var(--shadow-1);
+}
+
+/* 纸感世界也把「设置」挪到左栏之后，顶栏只留业务动作 */
+@media (prefers-reduced-transparency:reduce){
+  :is([data-world="d"],[data-world="g"]) .rail,
+  :is([data-world="d"],[data-world="g"]) .listpane,
+  :is([data-world="d"],[data-world="g"]) .detail,
+  :is([data-world="d"],[data-world="g"]) .drawer,
+:is([data-world="d"],[data-world="g"]) .authcard{ backdrop-filter:none }
+  :is([data-world="d"],[data-world="g"]) .rail,
+  :is([data-world="d"],[data-world="g"]) .listpane,
+  :is([data-world="d"],[data-world="g"]) .detail,
+:is([data-world="d"],[data-world="g"]) .drawer{ background:var(--bg-2) }
+}
+/* --- v3.1 玻璃面板的底色（显式值，避免 color-mix 在不同浏览器里的不确定行为） --- */
+body[data-world="d"] .rail,
+body[data-world="d"] .listpane,
+body[data-world="d"] .detail,
+body[data-world="d"] .drawer{
+  background:rgba(10,12,19,.58);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.13);
+}
+body[data-world="g"] .rail,
+body[data-world="g"] .listpane,
+body[data-world="g"] .detail,
+body[data-world="g"] .drawer{
+  background:rgba(255,255,255,.46);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85);
+}
+/* 抽屉打开时，玻璃版仍要够清楚 */
+body[data-world="d"] .drawer{ background:rgba(10,12,19,.78) }
+body[data-world="g"] .drawer{ background:rgba(255,255,255,.82) }
+/* --- v3.2 玻璃版里「正文坐实心台面」：面板是玻璃，内容是实心，对比度可控 --- */
+body[data-world="d"] .row,
+body[data-world="d"] .detail .body,
+body[data-world="d"] .listhead,
+body[data-world="g"] .row,
+body[data-world="g"] .detail .body,
+body[data-world="g"] .listhead{
+  background:var(--bg-2);
+}
+body[data-world="d"] .row{ border-bottom:1px solid rgba(255,255,255,.07) }
+body[data-world="g"] .row{ border-bottom:1px solid rgba(28,27,24,.08) }
+body[data-world="d"] .row[aria-selected="true"],
+body[data-world="g"] .row[aria-selected="true"]{ background:var(--surface); box-shadow:inset 2px 0 0 var(--accent) }
+/* --- v3.3 glass ground: wide linear gradient (something for the glass to blur) --- */
+body[data-world="d"]{
+  background-color:#080A10;
+  background-image:
+    linear-gradient(118deg, rgba(96,80,220,.55) 0%, rgba(28,34,64,.20) 34%, rgba(10,12,20,0) 62%),
+    linear-gradient(292deg, rgba(24,178,190,.34) 0%, rgba(14,32,44,.16) 30%, rgba(8,10,16,0) 58%),
+    linear-gradient(24deg, rgba(196,74,132,.30) 0%, rgba(40,16,30,.14) 26%, rgba(8,10,16,0) 52%);
+  background-attachment:fixed;
+}
+body[data-world="g"]{
+  background-color:#E6E8E4;
+  background-image:
+    linear-gradient(118deg, rgba(132,120,236,.34) 0%, rgba(238,240,235,0) 56%),
+    linear-gradient(292deg, rgba(96,214,202,.30) 0%, rgba(238,240,235,0) 52%),
+    linear-gradient(24deg, rgba(236,150,160,.26) 0%, rgba(238,240,235,0) 48%);
+  background-attachment:fixed;
+}
+/* ============================================================
+   v4 恢复「原版磨砂玻璃」：光斑层 + 半透明行 + 玻璃面板
+   （不再把行压成实色台面，不再用线性渐变当底）
+   ============================================================ */
+
+/* ① 光斑层：只有玻璃世界显示 */
+.blobs{position:fixed; inset:0; z-index:-1; overflow:hidden; background:transparent; display:none}
+[data-world="d"] .blobs,[data-world="g"] .blobs{display:block}
+.blobs i{position:absolute; display:block; border-radius:50%; filter:blur(90px)}
+.blobs .b1{width:680px; height:680px; left:-160px; top:-200px; background:#7C5BFF; opacity:.42}
+.blobs .b2{width:620px; height:620px; right:-180px; top:60px; background:#1FD1C8; opacity:.30}
+.blobs .b3{width:720px; height:560px; left:24%; bottom:-260px; background:#E0508C; opacity:.28}
+.blobs .b4{width:520px; height:520px; right:18%; bottom:-220px; background:#F0A23C; opacity:.22}
+.blobs::after{content:""; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(6,7,12,.55) 0%, rgba(6,7,12,.10) 40%, rgba(6,7,12,.62) 100%)}
+
+/* ② 玻璃世界的底：深色/浅色纯色，让光斑决定氛围 */
+body[data-world="d"]{background-color:#07080D; background-image:none}
+body[data-world="g"]{background-color:#EDEFEA; background-image:none}
+
+/* ③ 三块面板回到半透明玻璃（原版观感） */
+body[data-world="d"] .rail,
+body[data-world="d"] .listpane,
+body[data-world="d"] .detail{
+  background:rgba(11,13,21,.36);
+  border:1px solid rgba(255,255,255,.11);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 18px 46px rgba(0,0,0,.38);
+}
+body[data-world="g"] .rail,
+body[data-world="g"] .listpane,
+body[data-world="g"] .detail{
+  background:rgba(255,255,255,.40);
+  border:1px solid rgba(255,255,255,.70);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 18px 46px rgba(52,48,40,.16);
+}
+
+/* ④ 行回到半透明（不再坐实色台面），正文区域也透明让玻璃透上来 */
+body[data-world="d"] .row,
+body[data-world="d"] .listhead,
+body[data-world="d"] .detail .body{background:transparent}
+body[data-world="d"] .row{background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.07); border-radius:12px}
+body[data-world="d"] .row.sel{background:rgba(124,91,255,.16); border-color:rgba(124,91,255,.45); box-shadow:inset 2px 0 0 var(--accent)}
+body[data-world="g"] .row{background:rgba(255,255,255,.62); border:1px solid rgba(255,255,255,.75); border-radius:12px}
+
+/* ⑤ 抽屉在玻璃版要够清楚（否则读不了设置项） */
+body[data-world="d"] .drawer{background:rgba(10,12,19,.86)}
+body[data-world="g"] .drawer{background:rgba(255,255,255,.88)}
+/* ============================================================
+   v5 玻璃透明度真正生效 + 深色玻璃可读性修正
+   透明度来自 theme.js 写入的 --glass-alpha（20%–70%）
+   ============================================================ */
+:root{ --glass-alpha:.42 }
+
+/* 三块面板：alpha 直接来自滑杆 */
+body[data-world="d"] .rail,
+body[data-world="d"] .listpane,
+body[data-world="d"] .detail{
+  background:rgba(11,13,21,var(--glass-alpha));
+  border:1px solid rgba(255,255,255,.13);
+}
+body[data-world="g"] .rail,
+body[data-world="g"] .listpane,
+body[data-world="g"] .detail{
+  background:rgba(255,255,255,calc(var(--glass-alpha) + .18));
+  border:1px solid rgba(140,138,128,.22);
+  box-shadow:none;
+}
+
+/* 行：越不透越"实"，但始终比面板实一点，保证正文可读 */
+body[data-world="d"] .row{
+  background:rgba(255,255,255,calc(.030 + var(--glass-alpha) * .14));
+  border:1px solid rgba(255,255,255,calc(.06 + var(--glass-alpha) * .16));
+  border-radius:12px;
+}
+body[data-world="g"] .row{
+  background:rgba(255,255,255,calc(.40 + var(--glass-alpha) * .45));
+  border:1px solid rgba(255,255,255,.82);
+  border-radius:12px;
+}
+
+/* 深色玻璃：正文/元信息提亮（原来偏灰看不清） */
+body[data-world="d"]{ --fg-2:#D2D7E4; --fg-3:#A2ABC0 }
+body[data-world="d"] .pill{ background:rgba(255,255,255,.11); border-color:rgba(255,255,255,.17); color:#E7EAF2 }
+body[data-world="d"] .pill.k{ background:rgba(255,255,255,.07); color:#C6CCDB }
+body[data-world="d"] .row .time,body[data-world="d"] .why{ color:#9BA4BA }
+
+/* 滚动条：玻璃版用半透明细条，别出现一条亮台 */
+body[data-world="d"] .listpane::-webkit-scrollbar,
+body[data-world="d"] .detail .body::-webkit-scrollbar,
+body[data-world="d"] .rail::-webkit-scrollbar{ width:10px }
+body[data-world="d"] .listpane::-webkit-scrollbar-track,
+body[data-world="d"] .detail .body::-webkit-scrollbar-track,
+body[data-world="d"] .rail::-webkit-scrollbar-track{ background:transparent }
+body[data-world="d"] .listpane::-webkit-scrollbar-thumb,
+body[data-world="d"] .detail .body::-webkit-scrollbar-thumb,
+body[data-world="d"] .rail::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.16); border-radius:6px; border:2px solid transparent; background-clip:content-box;
+}
+/* 浅玻璃：行改列表式（去掉卡片嵌套感），靠分割线与字重分层 */
+body[data-world="g"] .row{
+  background:transparent; border:0; border-bottom:1px solid rgba(120,116,105,.16);
+  border-radius:0; padding:15px 16px;
+}
+body[data-world="g"] .row:last-child{ border-bottom:0 }
+body[data-world="g"] .row.sel{ background:rgba(107,91,214,.10); box-shadow:inset 2px 0 0 var(--accent) }
+body[data-world="g"] .listpane{ background:rgba(255,255,255,calc(var(--glass-alpha) + .26)) }
+
+/* 登录页里那圈"卡片套卡片"：把勾选行改成普通行 */
+.auth-body .row{ background:transparent; border:0; border-bottom:1px solid rgba(120,116,105,.16); border-radius:0; padding:10px 0 }
+.auth-body .row:last-of-type{ border-bottom:0 }
+/* ============================================================
+   v7 玻璃世界重做：更少的"卡片汤"，更准的层级与光
+   ============================================================ */
+
+/* 页面底：深色 + 顶部极淡的冷光，避免整屏死黑 */
+body[data-world="d"]{
+  background-color:#06070B;
+  background-image:radial-gradient(1200px 520px at 50% -12%, rgba(120,132,190,.16), transparent 70%);
+}
+body[data-world="g"]{
+  background-color:#EEEFEA;
+  background-image:radial-gradient(1100px 480px at 50% -14%, rgba(255,255,255,.85), transparent 72%);
+}
+
+/* 颗粒：给磨砂一层极细的质感（不是噪点图，是 4% 的胶片颗粒） */
+.blobs .grain,.grain{
+  position:absolute; inset:0; pointer-events:none; opacity:.05; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='140' height='140' filter='url(%23n)' opacity='.5'/></svg>");
+}
+
+/* 光斑：位置收在四条边上，尽量不压在正文后面 */
+.blobs i{filter:blur(150px)}
+.blobs .b1{left:-220px; top:-160px; opacity:.34}
+.blobs .b2{right:-240px; top:120px; opacity:.24}
+.blobs .b3{left:18%; bottom:-300px; opacity:.26; width:640px}
+.blobs .b4{right:6%; bottom:-280px; opacity:.18; width:460px}
+
+/* 顶栏也进玻璃家族（不再是一块实心圆角条） */
+body[data-world="d"] .topbar,
+body[data-world="g"] .topbar{
+  background:rgba(11,13,21,calc(var(--glass-alpha) * .78));
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10);
+  border-radius:16px;
+}
+body[data-world="g"] .topbar{
+  background:rgba(255,255,255,.62);
+  border-color:rgba(140,138,128,.18);
+}
+
+/* 三块面板：只留"明确的边"，阴影收紧（不再 1px 边 + 46px 大阴影） */
+body[data-world="d"] .rail,
+body[data-world="d"] .listpane,
+body[data-world="d"] .detail{
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.13);
+  box-shadow:0 8px 22px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.12);
+}
+body[data-world="g"] .rail,
+body[data-world="g"] .listpane,
+body[data-world="g"] .detail{
+  border-radius:18px;
+  border:1px solid rgba(140,138,128,.20);
+  box-shadow:0 6px 18px rgba(60,56,46,.10), inset 0 1px 0 rgba(255,255,255,.85);
+}
+
+/* 列表行：深色用"玻璃薄片"，浅色用列表分割（避免卡片套卡片） */
+body[data-world="d"] .row{
+  border-radius:11px;
+  background:rgba(255,255,255,calc(.026 + var(--glass-alpha) * .10));
+  border:1px solid rgba(255,255,255,calc(.045 + var(--glass-alpha) * .10));
+  transition:background .14s ease, border-color .14s ease;
+}
+body[data-world="d"] .row:hover{
+  background:rgba(255,255,255,calc(.045 + var(--glass-alpha) * .12));
+  border-color:rgba(255,255,255,.20);
+}
+body[data-world="d"] .row.sel{
+  background:color-mix(in oklab, var(--accent) 20%, rgba(255,255,255,.045));
+  border-color:color-mix(in oklab, var(--accent) 52%, transparent);
+  box-shadow:0 0 0 1px color-mix(in oklab, var(--accent) 20%, transparent),
+             0 8px 22px -14px color-mix(in oklab, var(--accent) 60%, transparent);
+}
+
+/* 选中行/标题的字重与留白：让"当前项"一眼可辨 */
+body[data-world="d"] .row.sel .t{ color:#F2F4FA }
+body[data-world="d"] .listhead{ border-bottom-color:rgba(255,255,255,.10) }
+
+/* 详情栏：正文区不再透明压字，改为"半实台面 + 极淡分隔" */
+body[data-world="d"] .detail .body{ background:transparent }
+body[data-world="d"] .sect{ border-top-color:rgba(255,255,255,.10) }
+
+/* 抽屉：玻璃但足够实 */
+body[data-world="d"] .drawer{
+  border-left:1px solid rgba(255,255,255,.12);
+  box-shadow:-18px 0 44px rgba(0,0,0,.42);
+}
+
+/* ============================================================
+   v8 按 impeccable 收口：去掉侧边色条 / 嵌套卡片 / 埋着的位图质感
+   ============================================================ */
+
+/* ① 去掉颗粒层与页面上的径向光（检测器判为 buried-raster） */
+.grain{ display:none !important }
+body[data-world="d"],body[data-world="g"]{ background-image:none }
+
+/* ② 选中行不再用 >1px 的左侧色条（side-tab），改成"底色 + 边框 + 字重" */
+body[data-world="d"] .row.sel,
+body[data-world="g"] .row.sel{
+  box-shadow:none;
+  background:rgba(124,91,255,.18);
+  border-color:rgba(150,124,255,.55);
+}
+body[data-world="g"] .row.sel{ background:rgba(107,91,214,.12); border-bottom-color:rgba(107,91,214,.45) }
+
+/* ③ 深色玻璃的行不再是"卡片套卡片"：只保留底色，无边框无圆角 */
+body[data-world="d"] .row{
+  background:rgba(255,255,255,calc(.028 + var(--glass-alpha) * .10));
+  border:0; border-radius:0;
+  border-bottom:1px solid rgba(255,255,255,.055);
+  padding:15px 16px;
+}
+body[data-world="d"] .row:last-child{ border-bottom:0 }
+body[data-world="d"] .row:hover{ background:rgba(255,255,255,calc(.05 + var(--glass-alpha) * .10)) }
+
+/* ④ 光斑只剩两块（更克制），且都在文字区之外 */
+.blobs .b1{ left:-240px; top:-200px; opacity:.30 }
+.blobs .b2{ opacity:0 }
+.blobs .b3{ left:34%; bottom:-320px; opacity:.20; width:700px }
+.blobs .b4{ right:-200px; bottom:-160px; opacity:.16; width:520px }
+/* v8.1 把颜色还给玻璃：光斑回到 4 块、强度适中（检测器问题已在别处清掉） */
+.blobs .b1{ left:-240px; top:-220px; opacity:.36 }
+.blobs .b2{ right:-260px; top:80px; opacity:.24 }
+.blobs .b3{ left:26%; bottom:-300px; opacity:.28; width:720px }
+.blobs .b4{ right:-160px; bottom:-200px; opacity:.20; width:520px }
+/* 玻璃面板的底再压薄一点，让颜色透上来 */
+body[data-world="d"] .rail,body[data-world="d"] .listpane,body[data-world="d"] .detail{ background:rgba(11,13,21,calc(var(--glass-alpha) * .92)) }
+/* v8.2 让玻璃后面真的有颜色：去掉压暗层，光斑提到可见强度 */
+.blobs::after{ background:none }
+.blobs i{ filter:blur(120px) }
+.blobs .b1{ left:-200px; top:-200px; width:720px; height:720px; opacity:.62; background:#6E4BFF }
+.blobs .b2{ right:-220px; top:40px; width:660px; height:660px; opacity:.42; background:#12C8BE }
+.blobs .b3{ left:22%; bottom:-280px; width:760px; height:600px; opacity:.46; background:#E04C8C }
+.blobs .b4{ right:-120px; bottom:-200px; width:520px; height:520px; opacity:.34; background:#F2A33F }
+/* 玻璃面板再薄一点，颜色才透得出来 */
+body[data-world="d"] .rail,body[data-world="d"] .listpane,body[data-world="d"] .detail{ background:rgba(9,11,18,calc(var(--glass-alpha) * .80)) }
+body[data-world="g"] .rail,body[data-world="g"] .listpane,body[data-world="g"] .detail{ background:rgba(255,255,255,calc(var(--glass-alpha) * .70 + .10)) }
+/* ============================================================
+   v9  P2 方案：所有世界共用同一套布局（切换不位移）
+       玻璃底改"默认纯色 + 可换背景图"，不再用光斑
+       滑杆填充按"轨道宽 - 滑块宽"换算，做到像素级对齐
+   ============================================================ */
+
+/* ① 一套布局给四个世界：网格、间距、内边距全部一致 */
+.shell,
+body[data-world="d"] .shell,
+body[data-world="g"] .shell{
+  display:grid;
+  grid-template-columns:236px minmax(0,1fr) 344px;
+  grid-template-rows:60px minmax(0,1fr);
+  gap:12px;
+  padding:12px 14px 14px;
+  height:100vh;
+  box-sizing:border-box;
+}
+.topbar,
+body[data-world="d"] .topbar,
+body[data-world="g"] .topbar{ grid-row:1; grid-column:1 / -1; margin:0 }
+
+.rail, .listpane, .detail,
+body[data-world="d"] .rail, body[data-world="d"] .listpane, body[data-world="d"] .detail,
+body[data-world="g"] .rail, body[data-world="g"] .listpane, body[data-world="g"] .detail{
+  grid-row:2;
+}
+
+/* ② P2：光斑退场，玻璃后面是"纯色"（选背景图后才换成图） */
+.blobs{ display:none !important }
+body[data-world="d"]{ background-color:#080A11; background-image:none }
+body[data-world="g"]{ background-color:#EDEFEA; background-image:none }
+
+/* ③ 顶栏与面板材质（P2：靠透明度与描边分层，不靠彩色光） */
+body[data-world="d"] .topbar{
+  background:rgba(12,14,22,calc(var(--glass-alpha) * .72 + .10));
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.09);
+  border-radius:14px;
+}
+body[data-world="g"] .topbar{
+  background:rgba(255,255,255,.66);
+  border:1px solid rgba(140,138,128,.18);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+  border-radius:14px;
+}
+body[data-world="d"] .rail,body[data-world="d"] .listpane,body[data-world="d"] .detail{
+  background:rgba(12,14,22,calc(var(--glass-alpha) * .86));
+  border:1px solid rgba(255,255,255,.11);
+  border-radius:16px;
+  box-shadow:0 6px 18px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.10);
+}
+body[data-world="g"] .rail,body[data-world="g"] .listpane,body[data-world="g"] .detail{
+  background:rgba(255,255,255,calc(var(--glass-alpha) * .62 + .18));
+  border:1px solid rgba(140,138,128,.20);
+  border-radius:16px;
+  box-shadow:0 5px 14px rgba(60,56,46,.09), inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+/* ============================================================
+   v10 · P2 收口（用户 2026-10-25 12:0x 的要求：一套布局，切深色不位移）
+   ① 外壳/顶栏/三栏/抽屉的盒子尺寸只定义一次，四个世界共用
+   ② 行密度（--row-pad / --list-gap）统一，不再随世界跳
+   ③ 滑杆重做：输入框高 = 滑块高，轨道用背景渐变画在正中，
+      填充末端按「轨道宽 - 滑块宽」换算，严格落在滑块圆心
+   ============================================================ */
+
+/* ① 外壳：一份几何，四个世界共用 */
+body,
+body[data-world="a"], body[data-world="b"], body[data-world="d"], body[data-world="g"]{
+  margin:0; padding:0; border:0; border-radius:0;
+}
+.shell,
+body[data-world="a"] .shell, body[data-world="b"] .shell,
+body[data-world="d"] .shell, body[data-world="g"] .shell{
+  display:grid;
+  grid-template-columns:236px minmax(0,1fr) 344px;
+  grid-template-rows:60px minmax(0,1fr);
+  gap:12px;
+  padding:12px 14px 14px;
+  height:100vh;
+  min-height:0;
+  box-sizing:border-box;
+}
+
+/* 顶栏：同一个盒子（高 60 / 左右 16），只换材质 */
+.topbar,
+[data-world="a"] .topbar, [data-world="b"] .topbar,
+[data-world="d"] .topbar, [data-world="g"] .topbar{
+  grid-row:1; grid-column:1 / -1;
+  margin:0; padding:0 16px; height:60px; border-radius:14px;
+  box-sizing:border-box;
+}
+
+/* 三栏外框：同样的圆角与 1px 边 */
+.rail,
+[data-world="a"] .rail, [data-world="b"] .rail, [data-world="d"] .rail, [data-world="g"] .rail{
+  border-radius:14px; border:1px solid var(--line); padding:14px 14px 12px;
+}
+.listpane,
+[data-world="a"] .listpane, [data-world="b"] .listpane,
+[data-world="d"] .listpane, [data-world="g"] .listpane{
+  border-radius:14px; border:1px solid var(--line); overflow:hidden;
+}
+.detail,
+[data-world="a"] .detail, [data-world="b"] .detail,
+[data-world="d"] .detail, [data-world="g"] .detail{
+  border-radius:14px; border:1px solid var(--line);
+}
+
+/* 行密度：四个世界同一套 */
+body[data-world]{ --row-pad:12px; --list-gap:6px }
+.rows,
+[data-world="a"] .rows, [data-world="b"] .rows,
+[data-world="d"] .rows, [data-world="g"] .rows{
+  padding:12px 16px 90px;
+}
+
+/* 抽屉：同一位置、同一尺寸、同一圆角 */
+.drawer,
+[data-world="a"] .drawer, [data-world="b"] .drawer,
+[data-world="d"] .drawer, [data-world="g"] .drawer{
+  margin:14px; height:calc(100% - 28px); width:min(430px,92vw);
+  border-radius:14px; border:1px solid var(--line-2);
+}
+
+/* ② 滑杆：一条轨道、一个滑块，填充末端 = 滑块圆心 */
+.rangewrap{ display:flex; align-items:center; gap:10px; height:26px }
+.range{
+  --track:6px; --thumb:16px; --pct:.44;
+  --range-rest:rgba(255,255,255,.20);
+  -webkit-appearance:none; appearance:none;
+  display:block; flex:none;
+  width:132px; height:var(--thumb);
+  margin:0; padding:0; border:0; border-radius:999px;
+  background-color:transparent;
+  background-image:linear-gradient(90deg,
+    var(--accent) 0 calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--pct)),
+    var(--range-rest) calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--pct)) 100%);
+  background-size:100% var(--track);
+  background-position:center;
+  background-repeat:no-repeat;
+  outline-offset:6px;
+}
+body[data-world="a"] .range,
+body[data-world="b"] .range,
+body[data-world="g"] .range{ --range-rest:rgba(120,116,105,.26) }
+.range::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none;
+  width:var(--thumb); height:var(--thumb); border-radius:50%;
+  background:#fff; border:2px solid var(--accent);
+  box-shadow:0 2px 6px rgba(0,0,0,.28);
+  cursor:grab;
+}
+.range:active::-webkit-slider-thumb{ cursor:grabbing }
+.range::-moz-range-track{ height:var(--track); background:transparent; border:0 }
+.range::-moz-range-progress{ height:var(--track); background:var(--accent); border-radius:999px }
+.range::-moz-range-thumb{
+  width:14px; height:14px; border-radius:50%;
+  background:#fff; border:2px solid var(--accent);
+}
+
+/* ⑤ 行：四个世界共用同一盒模型 —— 深色玻璃原来用 15px/16px 内边距 +
+   只保留底边框，整列比浅色高出 5px/行，滚起来上下错位。现在统一 12px/14px + 1px 全边框 */
+body[data-world="a"], body[data-world="b"],
+body[data-world="d"], body[data-world="g"]{ --row-pad:12px; --list-gap:6px }
+body[data-world="d"] .row,
+body[data-world="g"] .row{
+  padding:var(--row-pad) 14px;
+  border:1px solid transparent;
+  border-radius:12px;
+}
+body[data-world="d"] .row{ border-color:rgba(255,255,255,calc(.06 + var(--glass-alpha) * .16)) }
+body[data-world="g"] .row{ border-color:rgba(255,255,255,.80) }
+body[data-world="d"] .row.sel,
+body[data-world="g"] .row.sel{ border-color:rgba(150,124,255,.55) }
+body[data-world="d"] .row:last-child,
+body[data-world="g"] .row:last-child{ border-bottom:1px solid transparent }
+body[data-world="d"] .row:last-child{ border-bottom-color:rgba(255,255,255,calc(.06 + var(--glass-alpha) * .16)) }
+body[data-world="g"] .row:last-child{ border-bottom-color:rgba(255,255,255,.80) }
+
+/* ⑥ 抽屉：flex 子项没写 min-height:0，内容撑破抽屉、从底部溢出 20px，
+   结果整个页面多出一条竖向滚动条（换世界时页面会跟着跳）。裁掉 + 内部滚动 */
+.drawer{ overflow:hidden }
+.drawer .scroll{ min-height:0 }
+
+/* ⑦ 页面本身永不滚动：这是固定尺寸的应用壳，四栏各自内部滚动。
+   加上这条之后 document.scrollHeight 与视口严格相等，换世界不会再出现页面级滚动条 */
+html, body{ height:100%; margin:0; overflow:hidden }
+.shell{ overflow:hidden }
+
+/* ==========================================================================
+   v11 · 真磨砂（frosted）
+   上一版收口把 `.blobs` 与 `.grain` 用 !important 关掉了，背景只剩一块纯色，
+   `backdrop-filter` 去模糊纯色 = 还是纯色，所以玻璃既不透也没有磨砂感。
+   这一层：恢复彩色光斑当磨砂光源 → 玻璃面做薄、做毛、加砂粒 → 背景图才透得出来。
+   只作用于玻璃世界（d 深色玻璃 / g 浅色玻璃）；纸感世界 a、b 不动。
+   ========================================================================== */
+
+/* 1) 磨砂光源：彩色光斑（没放背景图时，它就是玻璃后面的东西） */
+body[data-world="d"] .blobs,
+body[data-world="g"] .blobs{
+  display:block !important; position:fixed; inset:0; z-index:-1; overflow:hidden;
+  pointer-events:none; opacity:1;
+}
+body[data-world="d"] .blobs i,
+body[data-world="g"] .blobs i{
+  position:absolute; display:block; border-radius:50%; filter:blur(120px);
+}
+body[data-world="d"] .blobs .b1{
+  left:-200px; top:-220px; width:760px; height:760px; opacity:.62;
+  background:radial-gradient(circle at 42% 42%,#6D5BFF,#3B1E8F 58%,transparent 72%);
+}
+body[data-world="d"] .blobs .b2{
+  right:-220px; top:20px; width:680px; height:680px; opacity:.46;
+  background:radial-gradient(circle at 50% 50%,#22D3EE,#0E7490 60%,transparent 72%);
+}
+body[data-world="d"] .blobs .b3{
+  left:20%; bottom:-300px; width:780px; height:620px; opacity:.46;
+  background:radial-gradient(circle at 50% 50%,#F472B6,#9D174D 58%,transparent 70%);
+}
+body[data-world="d"] .blobs .b4{
+  right:-140px; bottom:-220px; width:560px; height:560px; opacity:.30;
+  background:radial-gradient(circle at 50% 50%,#FBBF24,#B45309 55%,transparent 70%);
+}
+body[data-world="g"] .blobs .b1{
+  left:-200px; top:-220px; width:760px; height:760px; opacity:.42;
+  background:radial-gradient(circle at 42% 42%,#A78BFA,#C4B5FD 60%,transparent 74%);
+}
+body[data-world="g"] .blobs .b2{
+  right:-220px; top:20px; width:680px; height:680px; opacity:.34;
+  background:radial-gradient(circle at 50% 50%,#7DD3FC,#BAE6FD 60%,transparent 74%);
+}
+body[data-world="g"] .blobs .b3{
+  left:20%; bottom:-300px; width:780px; height:620px; opacity:.34;
+  background:radial-gradient(circle at 50% 50%,#FDA4AF,#FECDD3 58%,transparent 72%);
+}
+body[data-world="g"] .blobs .b4{
+  right:-140px; bottom:-220px; width:560px; height:560px; opacity:.26;
+  background:radial-gradient(circle at 50% 50%,#FCD34D,#FDE68A 55%,transparent 72%);
+}
+/* 放了背景图：光斑退成薄纱，让照片自己说话（照片已经很花了，别再叠色） */
+body.has-image .blobs{ opacity:.14 }
+
+/* 2) 玻璃面的材质：薄、毛、有边光。
+      毛的关键不是 blur 本身，是 blur + saturate + 一点点压暗（否则浅色照片会把字洗掉）。 */
+body[data-world="d"] .topbar,
+body[data-world="d"] .rail,
+body[data-world="g"] .topbar,
+body[data-world="g"] .rail{
+  position:relative;
+  border:1px solid rgba(255,255,255,.13);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16), inset 0 0 0 1px rgba(255,255,255,.03),
+             0 20px 44px -28px rgba(0,0,0,.65);
+}
+body[data-world="d"] .rail,
+body[data-world="d"] .topbar{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.015) 60%, rgba(255,255,255,.03)),
+    rgba(9,11,18, calc(.26 + var(--glass-alpha) * .52));
+}
+
+body[data-world="d"] .listpane,
+body[data-world="d"] .detail,
+body[data-world="d"] .drawer,
+body[data-world="g"] .listpane,
+body[data-world="g"] .detail,
+body[data-world="g"] .drawer{
+  position:relative;
+  border:1px solid rgba(255,255,255,.11);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), inset 0 0 0 1px rgba(255,255,255,.02),
+             0 22px 48px -30px rgba(0,0,0,.7);
+}
+body[data-world="d"] .listpane,
+body[data-world="d"] .detail,
+body[data-world="d"] .drawer{
+  background:rgba(9,11,18,calc(.16 + var(--glass-alpha) * .60));
+}
+
+body[data-world="g"] .rail,
+body[data-world="g"] .topbar{
+  background:rgba(255,255,255,.46);
+  border-color:rgba(28,27,24,.10);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85), 0 18px 40px -28px rgba(44,40,33,.42);
+}
+body[data-world="g"] .listpane,
+body[data-world="g"] .detail,
+body[data-world="g"] .drawer{
+  background:rgba(255,255,255,calc(.26 + var(--glass-alpha) * .62));
+  border-color:rgba(28,27,24,.10);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 20px 44px -30px rgba(44,40,33,.45);
+}
+
+/* 3) 里面的行也要透，不然玻璃只透边框、不透内容区 */
+body[data-world="d"] .rows{ background:transparent }
+body[data-world="d"] .row{
+  background:rgba(255,255,255,.045);
+  border-color:rgba(255,255,255,.075);
+  -webkit-backdrop-filter:none; backdrop-filter:none;
+  box-shadow:none;
+}
+body[data-world="d"] .row:hover{ background:rgba(255,255,255,.075) }
+body[data-world="d"] .row.sel{
+  background:color-mix(in oklab, var(--accent) 22%, rgba(255,255,255,.04));
+  border-color:color-mix(in oklab, var(--accent) 42%, transparent);
+}
+body[data-world="g"] .rows{ background:transparent }
+body[data-world="g"] .row{
+  background:rgba(255,255,255,.62);
+  border-color:rgba(28,27,24,.09);
+  -webkit-backdrop-filter:none; backdrop-filter:none;
+  box-shadow:0 1px 2px rgba(44,40,33,.04);
+}
+body[data-world="g"] .row:hover{ background:rgba(255,255,255,.82) }
+body[data-world="g"] .row.sel{
+  background:color-mix(in oklab, var(--accent) 12%, #FFFFFF);
+  border-color:color-mix(in oklab, var(--accent) 38%, transparent);
+}
+
+/* 4) 砂粒：磨砂的「毛」靠这一层颗粒，玻璃下面才不像一块塑料 */
+body[data-world="d"] :is(.topbar,.rail,.listpane,.detail,.drawer),
+body[data-world="g"] :is(.topbar,.rail,.listpane,.detail,.drawer){ position:relative; isolation:isolate }
+body[data-world="d"] :is(.topbar,.rail,.listpane,.detail,.drawer)::after,
+body[data-world="g"] :is(.topbar,.rail,.listpane,.detail,.drawer)::after{
+  content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:2;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
+  background-size:160px 160px;
+  opacity:.15;
+  mix-blend-mode:normal;
+}
+body[data-world="g"] :is(.topbar,.rail,.listpane,.detail,.drawer)::after{ opacity:.06; mix-blend-mode:normal }
+
+/* 5) 收掉原来那块「关掉磨砂」的 !important */
+body[data-world="d"] .grain,
+body[data-world="g"] .grain{ display:none !important }
+
+/* 修正 v11：抽屉本来就是 position:fixed + translate 滑入。
+   上面给玻璃面统一加 position:relative 时把它一起改了，抽屉就被 .shell 的 overflow 裁出屏幕，
+   表现成「设置打不开」。这里把定位还回去，材质仍用 v11 的那套。 */
+body[data-world="d"] .drawer,
+body[data-world="g"] .drawer{
+  position:fixed; top:0; right:0; z-index:50;
+  height:calc(100% - 28px); width:min(430px,92vw); margin:14px;
+}
+/* ==========================================================================
+   v12 · 透明度对「纸感」也生效
+   纸感不模糊（纸就是纸），只把面板变成半透明的纸幕，背景照片清楚透出来。
+   没放背景图时不动纸感原本的实色台面 —— 没有东西可透，就别把它调薄。
+   ========================================================================== */
+body[data-world="a"],
+body[data-world="b"]{
+  --panel-a:calc(.20 + var(--glass-alpha, .42) * .86);
+  --row-a:calc(.34 + var(--glass-alpha, .42) * .76);
+}
+body.has-image[data-world="a"] :is(.topbar,.rail,.listpane,.detail,.drawer),
+body.has-image[data-world="b"] :is(.topbar,.rail,.listpane,.detail,.drawer){
+  background:color-mix(in oklab, var(--surface) calc(var(--panel-a) * 100%), transparent);
+}
+body.has-image[data-world="a"] .row,
+body.has-image[data-world="b"] .row{
+  background:color-mix(in oklab, var(--surface) calc(var(--row-a) * 100%), transparent);
+}
+body.has-image[data-world="a"] .listhead,
+body.has-image[data-world="b"] .listhead{ background:transparent }
+body.has-image[data-world="a"] .detail .body,
+body.has-image[data-world="b"] .detail .body{ background:transparent }
+/* 设置抽屉是「浮起来的对话层」，纸感又没有模糊兜底：太透会和后面的字叠一起看不清，
+   所以这里单独给高得多的下限，只留一点点背景图的气息。 */
+body.has-image[data-world="a"] .drawer,
+body.has-image[data-world="b"] .drawer{
+  background:color-mix(in oklab, var(--surface) 96%, transparent);
+}
+/* ==========================================================================
+   v13 · 玻璃的「玻璃感」：折射 + 边光 + 厚度
+   上一版玻璃只是「糊一点的半透明色块」，跟纸感差别太小。真正的玻璃有三个物理线索：
+     ① 折射：背景穿过玻璃时被轻轻掰弯（SVG feDisplacementMap，走 backdrop-filter）
+     ② 边光：左上被光啃亮，右下收暗 —— 1px 的渐变环，不是均匀描边
+     ③ 厚度：上沿一道内高光，下沿一道内暗边，外面再压一层投影
+   纸感一律不参与（纸是哑光的，不该有折射和边光）。
+   ========================================================================== */
+
+/* ① 折射：噪声场位移，幅度小、尺度大 —— 是「厚玻璃的起伏」，不是液态乱流 */
+/* 磨砂改为「背景层先糊一次」：面板不再做 backdrop-filter。
+   实测（1440×900、24 张卡程序化滚动）：
+     每帧 backdrop-filter（含 url 位移滤镜） 50.0ms/帧 ≈ 20fps
+     去掉位移滤镜                           34.7ms ≈ 29fps
+     连面板模糊也去掉、改成背景预糊         16.7ms ≈ 60fps
+   代价是「透过玻璃看到的背景」少了再折射一次，但霜感还在（背景本来就是糊的）。 */
+body[data-world="d"] :is(.topbar,.rail,.listpane,.detail,.drawer),
+body[data-world="g"] :is(.topbar,.rail,.listpane,.detail,.drawer){
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+
+/* ② 边光：135° 的渐变环，左上亮、右下暗，中间整段透明 */
+body[data-world="d"] :is(.topbar,.rail,.listpane,.detail,.drawer),
+body[data-world="g"] :is(.topbar,.rail,.listpane,.detail,.drawer){
+  position:relative;
+}
+body[data-world="d"] :is(.topbar,.rail,.listpane,.detail,.drawer)::before,
+body[data-world="g"] :is(.topbar,.rail,.listpane,.detail,.drawer)::before{
+  content:""; position:absolute; inset:0; z-index:3; pointer-events:none;
+  border-radius:inherit; padding:1px;
+  background:linear-gradient(135deg,
+    rgba(255,255,255,.78), rgba(255,255,255,.10) 26%,
+    rgba(255,255,255,0) 46%, rgba(255,255,255,0) 58%,
+    rgba(255,255,255,.42) 82%, rgba(255,255,255,.16));
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite:exclude;
+}
+body[data-world="g"] :is(.topbar,.rail,.listpane,.detail,.drawer)::before{
+  background:linear-gradient(135deg,
+    rgba(255,255,255,.95), rgba(255,255,255,.25) 26%,
+    rgba(255,255,255,0) 46%, rgba(255,255,255,0) 58%,
+    rgba(120,112,96,.28) 84%, rgba(120,112,96,.10));
+}
+
+/* ③ 厚度：上沿内高光 + 下沿内暗边 + 外投影 */
+body[data-world="d"] :is(.topbar,.rail,.listpane,.detail,.drawer){
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.26),
+    inset 0 -1px 0 rgba(0,0,0,.42),
+    0 26px 56px -26px rgba(0,0,0,.72);
+}
+body[data-world="g"] :is(.topbar,.rail,.listpane,.detail,.drawer){
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.95),
+    inset 0 -1px 0 rgba(120,112,96,.18),
+    0 22px 44px -26px rgba(60,54,44,.40);
+}
+
+/* ④ 台面反光：从上往下的一层薄薄的天光，让面「有弧度」而不是平涂 */
+body[data-world="d"] :is(.listpane,.detail,.drawer,.rail,.topbar){
+  background-image:
+    radial-gradient(120% 80% at 12% 0%, rgba(255,255,255,.16), rgba(255,255,255,0) 62%),
+    linear-gradient(180deg, rgba(255,255,255,.17), rgba(255,255,255,.055) 22%, rgba(255,255,255,.02) 70%);
+}
+body[data-world="g"] :is(.listpane,.detail,.drawer,.rail,.topbar){
+  background-image:linear-gradient(180deg,
+    rgba(255,255,255,.55), rgba(255,255,255,.16) 18%, rgba(255,255,255,0) 52%);
+}
+
+/* ⑤ 砂粒按玻璃调低一点：磨砂是「细腻的哑」，不是「看得见颗粒」 */
+body[data-world="d"] :is(.topbar,.rail,.listpane,.detail,.drawer)::after,
+body[data-world="g"] :is(.topbar,.rail,.listpane,.detail,.drawer)::after{
+  opacity:.085;
+}
+/* v13 修正：上面为了边光给玻璃面加了 position:relative，别再把抽屉从 fixed 拉回文档流 */
+body[data-world="d"] .drawer,
+body[data-world="g"] .drawer{
+  position:fixed; top:0; right:0; z-index:50;
+  height:calc(100% - 28px); width:min(430px,92vw); margin:14px;
+}
+/* v13 调参：砂粒要真的看得见（.085 在屏上等于没有），再补一层「厚板」内阴影 */
+body[data-world="d"] :is(.topbar,.rail,.listpane,.detail,.drawer)::after,
+body[data-world="g"] :is(.topbar,.rail,.listpane,.detail,.drawer)::after{
+  opacity:.17;
+}
+body[data-world="d"] :is(.topbar,.rail,.listpane,.detail,.drawer){
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.26),
+    inset 0 -1px 0 rgba(0,0,0,.42),
+    inset 0 0 60px rgba(0,0,0,.22),
+    0 26px 56px -26px rgba(0,0,0,.72);
+}
+body[data-world="g"] :is(.topbar,.rail,.listpane,.detail,.drawer){
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.95),
+    inset 0 -1px 0 rgba(120,112,96,.18),
+    inset 0 0 60px rgba(255,255,255,.30),
+    0 22px 44px -26px rgba(60,54,44,.40);
+}
+/* v13 调参 2：原来的 overlay 混合在深色面板上几乎无效（噪点均值是中性灰），
+   换成 screen（深玻璃上冒白霜）/ multiply（浅玻璃上压细砂），颗粒才真的看得见 */
+body[data-world="d"] :is(.topbar,.rail,.listpane,.detail,.drawer)::after{
+  mix-blend-mode:screen; opacity:.10;
+}
+body[data-world="g"] :is(.topbar,.rail,.listpane,.detail,.drawer)::after{
+  mix-blend-mode:multiply; opacity:.14;
+}
+/* ==========================================================================
+   v14 · 按用户口味收口：深色烟玻璃不变，只把「边光」做强
+   边光是玻璃最容易读出来的那一笔：左上角被光啃出一道亮弧，右下角反一把淡光，
+   上沿再来一道内高光当「截面」。霜不要更白，就靠这道边把玻璃和纸分开。
+   ========================================================================== */
+
+/* 霜收回去一点：保持深色，别往奶白走 */
+body[data-world="d"] :is(.listpane,.detail,.drawer,.rail,.topbar){
+  background-image:
+    radial-gradient(120% 80% at 12% 0%, rgba(255,255,255,.11), rgba(255,255,255,0) 60%),
+    linear-gradient(180deg, rgba(255,255,255,.13), rgba(255,255,255,.04) 22%, rgba(255,255,255,.015) 70%);
+}
+
+/* 边光：环加厚到 1.5px，亮弧更亮更长，暗侧也留一道反光 */
+body[data-world="d"] :is(.topbar,.rail,.listpane,.detail,.drawer)::before{
+  padding:1.5px;
+  background:linear-gradient(140deg,
+    rgba(255,255,255,.95) 0%,
+    rgba(255,255,255,.42) 9%,
+    rgba(255,255,255,.08) 24%,
+    rgba(255,255,255,0) 42%,
+    rgba(255,255,255,0) 58%,
+    rgba(255,255,255,.10) 74%,
+    rgba(255,255,255,.52) 90%,
+    rgba(255,255,255,.24) 100%);
+}
+body[data-world="g"] :is(.topbar,.rail,.listpane,.detail,.drawer)::before{
+  padding:1.5px;
+  background:linear-gradient(140deg,
+    rgba(255,255,255,1) 0%,
+    rgba(255,255,255,.55) 9%,
+    rgba(255,255,255,.10) 24%,
+    rgba(255,255,255,0) 42%,
+    rgba(255,255,255,0) 58%,
+    rgba(120,112,96,.16) 74%,
+    rgba(120,112,96,.40) 90%,
+    rgba(120,112,96,.18) 100%);
+}
+
+/* 上沿截面：一道更实的白内高光 + 贴着它的一道细暗线，做出「厚度」 */
+body[data-world="d"] :is(.topbar,.rail,.listpane,.detail,.drawer){
+  box-shadow:
+    inset 0 1.5px 0 rgba(255,255,255,.34),
+    inset 0 -1px 0 rgba(0,0,0,.48),
+    inset 0 0 60px rgba(0,0,0,.22),
+    0 26px 56px -26px rgba(0,0,0,.72);
+}
+/* 字号：小 / 中 / 大（面板设置里的「字号」，只缩放文字，不动布局） */
+body{--fs-k:1}
+body[data-fs="s"]{--fs-k:.93}
+body[data-fs="m"]{--fs-k:1}
+body[data-fs="l"]{--fs-k:1.1}
+/* 字号调大后「命中：…」太长会把时间挤到第二行；让命中行可省略，时间始终靠右一行内 */
+.row .line3{flex-wrap:nowrap}
+.row .line3 .why{flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.row .line3 .time{flex:0 0 auto}
+/* ===== 编辑器（detail 里的新增/编辑表单） ===== */
+.detail .editor{padding:4px 0 8px; display:flex; flex-direction:column; gap:14px}
+.detail .editor .fld{display:flex; flex-direction:column; align-items:stretch; gap:6px}
+.detail .editor .fld > span{font-size:calc(12px * var(--fs-k, 1)); color:var(--fg-3)}
+.detail .editor input[type=text],
+.detail .editor input:not([type]),
+.detail .editor input[list],
+.detail .editor select,
+.detail .editor textarea{
+  width:100%; box-sizing:border-box;
+  font:inherit; font-size:calc(13.5px * var(--fs-k, 1));
+  color:var(--fg); background:var(--field, rgba(0,0,0,.03));
+  border:1px solid var(--line); border-radius:10px; padding:9px 11px;
+  outline:none; resize:vertical;
+}
+.detail .editor textarea{line-height:1.65; min-height:calc(120px * var(--fs-k, 1))}
+.detail .editor input:focus,
+.detail .editor select:focus,
+.detail .editor textarea:focus{border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent)}
+.detail .editor .two{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+.detail .editor .hint{margin:0; font-size:calc(12px * var(--fs-k, 1)); color:var(--fg-3); line-height:1.6}
+body[data-world="d"] .detail .editor input,
+body[data-world="d"] .detail .editor select,
+body[data-world="d"] .detail .editor textarea{background:rgba(255,255,255,.05)}
+@media (max-width:1180px){ .detail .editor .two{grid-template-columns:1fr} }
+
+/* [hidden] 要真的藏起来（.fld 的 display:flex 会盖掉浏览器默认） */
+.detail .editor .fld[hidden]{display:none !important}
+
+/* v13 · 记忆库位置：可编辑路径 + 两个按钮 + 说明 */
+.drawer .pathrow{
+  display:flex; align-items:center; gap:8px;
+  background:var(--surface-2); border:1px solid var(--line); border-radius:10px;
+  padding:7px 10px;
+}
+.drawer .pathrow svg{flex:0 0 auto; color:var(--fg-3)}
+.drawer .pathrow input{
+  flex:1 1 auto; min-width:0; border:0; background:transparent; outline:none;
+  color:var(--fg); font-size:calc(13px * var(--fs-k, 1));
+  font-family:var(--mono, Consolas, monospace);
+}
+.drawer .pathrow input:focus-visible{box-shadow:none}
+.drawer .pathrow .n{flex:0 0 auto; color:var(--fg-3); font-size:calc(12px * var(--fs-k, 1))}
+.drawer .pathbtns{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.drawer .pathbtns .btn.primary{flex:0 0 auto}
+.drawer .pathbtns .hint{flex:1 1 100%; color:var(--fg-3); font-size:calc(12px * var(--fs-k, 1)); line-height:1.5}
+
+/* v14 · 冲突裁决卡片 */
+.detail .conflictbox{margin-top:4px;padding:14px;border:1px solid var(--line-2);border-radius:12px;background:var(--surface-2)}
+.detail .conflictbox .sect-t{color:var(--fg)}
+.detail .conflictlist{list-style:none;margin:10px 0 12px;padding:0}
+.detail .conflictlist li{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:calc(13px * var(--fs-k, 1))}
+.detail .conflictlist .sub{margin-top:4px;color:var(--fg-3);font-size:calc(12px * var(--fs-k, 1))}
+.detail .conflictacts{display:flex;gap:8px;flex-wrap:wrap}
+
+/* v15 · 「关于你」身份层：抽屉里的小表单 */
+.drawer .fld.col{flex-direction:column;align-items:stretch;gap:8px}
+.drawer .fld.col > .lab{max-width:none}
+.drawer .fld > input,
+.drawer .fld > textarea{width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 10px;font:inherit;font-size:calc(13px * var(--fs-k, 1));color:var(--fg)}
+.drawer .fld > input:focus,
+.drawer .fld > textarea:focus{outline:2px solid var(--accent);outline-offset:0;border-color:transparent}
+.drawer .fld > textarea{resize:vertical;line-height:1.55;min-height:66px}
+.drawer .two{display:flex;gap:8px}
+.drawer .two > input{flex:1 1 0;min-width:0}
+.drawer .grp:first-child .lab b{color:var(--accent)}
+
+/* ---------- v16：运行状态（诊断）+ 更正链 ---------- */
+.topbar .brand{display:flex;align-items:center;gap:8px}
+.topbar .brand .dot{width:8px;height:8px;border-radius:50%;background:#2ecc71;box-shadow:0 0 0 3px rgba(46,204,113,.18)}
+.diagrows{display:flex;flex-direction:column;gap:4px}
+.diagrow{display:flex;justify-content:space-between;align-items:baseline;font-size:var(--fs-2,13px);color:var(--fg-3)}
+.diagrow b{color:var(--fg-1);font-weight:600}
+/* 更正链横幅：说明谁顶了谁、怎么反悔 */
+.supbox{margin-top:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
+.supbox .t{font-weight:600;margin-bottom:4px}
+.supbox .s{font-size:var(--fs-2,13px);color:var(--fg-3);line-height:1.5}
+.supbox .acts{display:flex;gap:8px;margin-top:8px}
+/* 「顶掉另一条」的选择态：列表整体变可点 */
+.rows.picking .row{cursor:crosshair}
+.rows.picking .row:hover{outline:2px dashed var(--accent);outline-offset:-2px}
+
+/* v17：设置抽屉里的项目清单 / 专题输入（4C） */
+.drawer .projrows{display:flex;flex-direction:column;gap:6px}
+.drawer .projrow{display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:12.5px}
+.drawer .projrow .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.drawer .projrow .ct{color:var(--fg-3);flex:0 0 auto}
+.drawer .projrow button{flex:0 0 auto;border:0;background:transparent;color:var(--fg-2);cursor:pointer;font:inherit;padding:2px 4px;border-radius:6px}
+.drawer .projrow button:hover{background:var(--surface-3);color:var(--fg)}
+.detail .pbody h4{margin:14px 0 6px;font-size:13px;color:var(--fg-2)}
+.detail .pbody .pl{padding:2px 0 2px 6px;color:var(--fg-2);font-size:13px;line-height:1.6}
+.detail .pbody .lnk{border:0;background:transparent;color:var(--accent);cursor:pointer;font:inherit;padding:0 2px;text-decoration:underline}
+.detail .sect h4{margin:16px 0 8px;font-size:13px;color:var(--fg-2)}
+.detail .src{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line);font-size:12.5px}
+.detail .src .st{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.detail .src .n{color:var(--fg-3);flex:0 0 auto}
+
+/* v18：可折叠分组（「关于你」二次展开）+ 地址行改竖排 */
+.drawer .disc{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  width:100%;
+  padding:2px 0 10px;
+  border:0;
+  border-bottom:1px solid var(--line);
+  background:transparent;
+  color:var(--fg);
+  text-align:left;
+  cursor:pointer;
+  font:inherit;
+}
+.drawer .disc b{font-size:15px;font-weight:650;letter-spacing:.01em}
+.drawer .disc .hint{
+  flex:1 1 auto;
+  min-width:0;
+  margin:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:11.5px;
+  color:var(--fg-3);
+}
+.drawer .disc .chev{
+  flex:0 0 auto;
+  display:inline-flex;
+  color:var(--fg-3);
+  transition:transform .18s ease;
+}
+.drawer .disc.open .chev{transform:rotate(180deg)}
+.drawer .disc:hover .chev{color:var(--fg-2)}
+.drawer #personaBody{padding-top:12px}
+.drawer #personaBody[hidden]{display:none !important}
+.drawer .fld.col .seg{align-self:flex-start}
+
+/* 4E-5：知识页「需重煮」标与过期横幅 */
+.pill.warn{ background:color-mix(in oklab, #B45309 18%, var(--surface)); color:#8A4B00; border-color:color-mix(in oklab,#B45309 35%, var(--line)) }
+.warnbox{ margin:10px 0 4px; padding:10px 12px; border-radius:10px;
+  background:color-mix(in oklab,#F59E0B 10%, transparent);
+  border:1px solid color-mix(in oklab,#B45309 30%, var(--line));
+  font-size:13px; line-height:1.55 }
+.warnbox b{ display:block; margin-bottom:2px; font-size:13.5px }
+.warnbox .hint{ color:var(--fg-2) }
+.detail .phead .desc{ margin-top:6px; font-size:13px; color:var(--fg-2); line-height:1.55 }
+
+/* 4E-6：画像建议区 */
+.sugbox{ margin-top:12px; padding-top:10px; border-top:1px dashed var(--line) }
+.sughead{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
+.sughead b{ font-size:13px }
+.sughead .hint{ flex:1 1 auto; min-width:0; font-size:11.5px; color:var(--fg-3) }
+.btn.small{ padding:3px 9px; font-size:12px }
+.sugrows{ margin-top:8px; display:flex; flex-direction:column; gap:8px }
+.sugrow{ border:1px solid var(--line); border-radius:10px; padding:8px 10px; background:var(--surface-2) }
+.sugrow .v{ font-size:13px; line-height:1.5 }
+.sugrow .r{ font-size:11.5px; color:var(--fg-3); margin-top:2px }
+.sugrow .acts{ display:flex; gap:6px; margin-top:6px }
+
+/* 左栏选中态：之前的 .on 类没有任何样式，所以「点了没反应」 */
+.rail a.on,
+.rail button.on{
+  background:var(--bg-3);
+  color:var(--fg);
+  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--accent) 55%, transparent);
+}
+.rail a.on .i,
+.rail button.on .i{color:var(--accent)}
+.rail a.on .n,
+.rail button.on .n{color:var(--accent); font-weight:650}
+
+/* 选中项再强化一点：左侧主题色竖条 + 主题色文字 */
+.rail a.on,
+.rail button.on{
+  box-shadow:inset 0 0 0 1.5px color-mix(in oklab, var(--accent) 70%, transparent),
+             inset 3px 0 0 var(--accent);
+  color:var(--accent);
+}
+
+/* ============================================================
+   v20 · 去掉每帧 backdrop-filter 之后的补偿
+   霜感改由「背景层预先模糊」提供（见 body::before），面板只剩半透明色；
+   少了 brightness(.74) 的压暗，正文在亮照片上会发飘 —— 用一层平铺的暗色内阴影补回来。
+   平铺（0 0 0 9999px）不是模糊，栅格化一次即可，滚动不重算。
+   ============================================================ */
+body[data-world="d"] :is(.topbar,.rail,.listpane,.detail,.drawer){
+  box-shadow:
+    inset 0 0 0 9999px rgba(6,7,11,.16),
+    inset 0 1px 0 rgba(255,255,255,.26),
+    inset 0 -1px 0 rgba(0,0,0,.42),
+    0 26px 56px -26px rgba(0,0,0,.72);
+}
+body[data-world="g"] :is(.topbar,.rail,.listpane,.detail,.drawer){
+  box-shadow:
+    inset 0 0 0 9999px rgba(255,255,255,.30),
+    inset 0 1px 0 rgba(255,255,255,.95),
+    inset 0 -1px 0 rgba(120,112,96,.18),
+    0 22px 44px -26px rgba(60,54,44,.40);
+}
+
+/* v21：折叠头的标题不许被挤成两行（有了「N 条建议」徽章之后会挤） */
+.drawer .disc b{ white-space:nowrap; flex:0 0 auto }
+.drawer .disc .pill.warn{ flex:0 0 auto }
+
+/* v21 · 收口：全站不再使用 backdrop-filter。
+   磨砂效果由 body::before 的预模糊提供（见 v20 注释）。
+   之前散落在 base 段的 .rail/.listpane/.detail/.row 等各有一条 blur()，
+   逐条改容易漏，这里统一压掉。 */
+:is(.topbar,.rail,.listpane,.detail,.drawer,.row,.listhead,.scrim-bg){
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* v21 · 玻璃世界正文对比：面板再压暗一点，行底微亮，文字不飘 */
+body[data-world="d"] :is(.topbar,.rail,.listpane,.detail,.drawer){
+  box-shadow:
+    inset 0 0 0 9999px rgba(6,7,11,.26),
+    inset 0 1px 0 rgba(255,255,255,.26),
+    inset 0 -1px 0 rgba(0,0,0,.42),
+    0 26px 56px -26px rgba(0,0,0,.72);
+}
+body[data-world="d"] .row{ background:rgba(255,255,255,.06) }
+
+/* v23：可能重复视图里那个「合并这组」按钮，别把行高撑开 */
+.detail .line3 .time .btn.small{ padding:3px 9px; font-size:12px }
+.rows .row[data-row]{ align-items:flex-start }

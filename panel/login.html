@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>我的记忆 · 登录</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-body" data-world="a">
+
+  <form class="authcard" autocomplete="on" id="loginForm" onsubmit="return false">
+      <div class="brandline">
+        <span class="mark"><svg class="i" viewBox="0 0 16 16" aria-hidden="true" style="width:16px;height:16px;color:var(--accent-fg)"><path d="M8 2.2 9.7 6l3.9 1.3-3.3 2.4.4 4-2.7-2-2.7 2 .4-4L2.4 7.3 6.3 6 8 2.2Z" fill="currentColor"/></svg></span>
+        <b>我的记忆</b>
+      </div>
+
+      <h1>登录面板</h1>
+      <p class="sub">这是这台电脑上的记忆面板。账号与密码只保存在本机，不上传任何地方。</p>
+
+      <div class="field">
+        <label for="acc">账号</label>
+        <input id="acc" name="account" value="owner" autocomplete="username" spellcheck="false">
+      </div>
+
+      <div class="field">
+        <label for="pwd">密码</label>
+        <input id="pwd" name="password" type="password" placeholder="首次在 DSH 会话里打印的随机密码" autocomplete="current-password">
+      </div>
+
+      <div class="row">
+        <label class="chk"><input type="checkbox" checked> 记住我（12 小时）</label>
+        <a href="#" id="hintLink">忘记密码？</a>
+      </div>
+
+      <button class="submit" type="submit" id="submitBtn">登录</button>
+      <p class="foot" id="msg">只监听 127.0.0.1 · 连续 5 次错误锁定 60 秒<br>忘记密码就在 DSH 里执行 <code>/memory 口令 重置</code></p>
+  </form>
+
+<script src="icons.js"></script>
+<script src="theme.js"></script>
+<script>
+(function () {
+  var form = document.getElementById('loginForm');
+  var acc = document.getElementById('acc');
+  var pwd = document.getElementById('pwd');
+  var msg = document.getElementById('msg');
+  var btn = document.getElementById('submitBtn');
+  var busy = false;
+
+  function say(text, bad) {
+    msg.textContent = text;
+    msg.style.color = bad ? '#B4442E' : '';
+  }
+
+  document.getElementById('hintLink').addEventListener('click', function (e) {
+    e.preventDefault();
+    say('密码只在第一次生成时打印在 DSH 会话里；重置用 /memory 口令 重置', false);
+  });
+
+  form.addEventListener('submit', async function () {
+    if (busy) return;
+    busy = true; btn.disabled = true; say('正在验证…', false);
+    try {
+      var res = await fetch('api/login', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ user: acc.value, password: pwd.value })
+      });
+      var data = await res.json().catch(function () { return {}; });
+      if (res.ok && data.ok) { location.href = './'; return; }
+      say(data.error || '登录失败（' + res.status + '）', true);
+      pwd.value = ''; pwd.focus();
+    } catch (err) {
+      say('连不上本地服务：' + err.message, true);
+    } finally {
+      busy = false; btn.disabled = false;
+    }
+  });
+
+  pwd.focus();
+  fetch('api/ping', { credentials: 'same-origin' })
+    .then(function (r) { return r.json(); })
+    .then(function (d) { if (d && d.authed) location.href = './'; })
+    .catch(function () {});
+})();
+</script>
+</body>
+</html>

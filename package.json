@@ -1,0 +1,46 @@
+{
+  "name": "dsh-memory",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "我的记忆 —— DSH（DeepSeek Harness）本地记忆插件：Markdown 仓库 + 规则/模型双层抽取 + 预算化注入 + Web 面板",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js"
+  },
+  "files": [
+    "lib",
+    "panel",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "optionalDependencies": {
+    "@huggingface/transformers": "^4.3.1"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "onnxruntime-node",
+      "protobufjs"
+    ]
+  },
+  "license": "MIT",
+  "repository": "github.com/ximeng-droid/dsh-memory",
+  "homepage": "https://github.com/ximeng-droid/dsh-memory",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "memory",
+    "markdown",
+    "rag",
+    "plugin"
+  ]
+}
