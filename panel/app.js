@@ -1321,13 +1321,22 @@ function bind() {
   // 「地址」= 跟随 DSH 端口 / 固定到任意端口（改完要重启 DSH 才起新监听）
   el('#portSave')?.addEventListener('click', () => savePort(el('#portInput')?.value ?? ''));
   el('#portFollow')?.addEventListener('click', () => { const i = el('#portInput'); if (i) i.value = ''; savePort(''); });
-  el('#portInput')?.addEventListener('input', async () => {
+  let portTimer = 0;
+  let portSeq = 0;
+  el('#portInput')?.addEventListener('input', () => {
     const v = String(el('#portInput')?.value ?? '').trim();
+    clearTimeout(portTimer);
+    const seq = ++portSeq;
     if (!v) { setPortNote('跟随 DSH 端口：每启动一次地址会变'); return; }
     const n = Number(v);
     if (!Number.isInteger(n) || n < 1024 || n > 65535) { setPortNote('端口要填 1024–65535 之间的整数', true); return; }
-    const chk = await checkPort(n);
-    setPortNote(chk.ok ? `${n} 可用，点「固定到这儿」保存（重启后生效）` : `${n} ${chk.error}`, !chk.ok);
+    setPortNote('正在检查…');
+    // 打字时别每敲一下就发一个请求；只认最后一次的结果，免得慢响应盖掉新结果
+    portTimer = setTimeout(async () => {
+      const chk = await checkPort(n);
+      if (seq !== portSeq) return;
+      setPortNote(chk.ok ? `${n} 可用，点「固定到这儿」保存（重启后生效）` : `${n} ${chk.error}`, !chk.ok);
+    }, 260);
   });
   // 「记多少」= 写入口径，落进 config.json（manual 不自动抓 / semi 只进待确认箱 / auto 直接生效）
   const wm = el('#writeModeSeg');
